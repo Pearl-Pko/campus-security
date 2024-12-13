@@ -76,14 +76,18 @@ export default function video() {
   const startRecording = async () => {
     paused.value = false;
     setRecording(true);
-    // const video = await cameraRef.current?.recordAsync();
+    console.log("damn");
+    const video = await cameraRef.current?.recordAsync({
+
+    });
     console.log("video", video?.uri);
   };
 
-  const endRecording = () => {
+  const endRecording = async () => {
     paused.value = true;
     setRecording(false);
-    // cameraRef.current?.stopRecording();
+    cameraRef.current?.stopRecording();
+    console.log("end");
   };
 
   useEffect(() => {
@@ -92,6 +96,15 @@ export default function video() {
       paused,
     );
     // cancelAnimation(strokeOffset);
+  }, []);
+
+    useEffect(() => {
+    (async () => {
+      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+      const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
+      // setHasPermission(cameraStatus === "granted" && audioStatus === "granted");
+      
+    })();
   }, []);
 
   if (!permission) {
@@ -114,6 +127,7 @@ export default function video() {
           style={styles.camera}
           facing={facing}
           ref={cameraRef}
+          mode="video"
           flash={flash}
         ></CameraView>
         <View style={styles.overlay}>
@@ -165,13 +179,6 @@ export default function video() {
               </TouchableOpacity>
             </View>
           )}
-          {/* {!recording && (
-           
-          )} */}
-
-          {/* <View style={{backgroundColor: "black"}}>
-            <Text>kl</Text>
-          </View> */}
           <View style={{ height: 100, justifyContent: "center" }}>
             <Pressable
               onPressIn={() => {
