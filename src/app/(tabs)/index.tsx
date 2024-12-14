@@ -9,7 +9,7 @@ export default function Tab() {
     <View style={styles.container}>
       <Text>Tab [Home|Settings]</Text>
 
-      <Link href="preview/da" asChild>
+      <Link href="video" asChild>
         <TouchableOpacity
           style={{
             backgroundColor: "#1E96FC",

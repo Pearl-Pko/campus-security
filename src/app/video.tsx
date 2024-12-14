@@ -77,10 +77,12 @@ export default function video() {
     paused.value = false;
     setRecording(true);
     console.log("damn");
-    const video = await cameraRef.current?.recordAsync({
+    const video = await cameraRef.current?.recordAsync({});
+    if (!video?.uri) return;
 
-    });
-    console.log("video", video?.uri);
+    const route = `preview/${encodeURIComponent(video.uri)}`;
+    router.push(route);
+    console.log("video", route);
   };
 
   const endRecording = async () => {
@@ -98,12 +100,11 @@ export default function video() {
     // cancelAnimation(strokeOffset);
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     (async () => {
       const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
       const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
       // setHasPermission(cameraStatus === "granted" && audioStatus === "granted");
-      
     })();
   }, []);
 

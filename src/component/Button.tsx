@@ -11,13 +11,13 @@ type Props = TouchableOpacityProps & {
 export default function Button({variant = "primary", style, LeftIcon, ...props}: Props) {
   const textColorVariants : Record<variant, ColorValue> = {
     primary: "#FFFFFF", 
-    secondary: "",
+    secondary: "#000000",
     white: "#000000"
   }
 
   const backgroundColorVariants : Record<variant, ColorValue> = {
     primary: "#FE2C55", 
-    secondary: "",
+    secondary: "lightgrey",
     white: "#FFFFFF"
   }
   return (

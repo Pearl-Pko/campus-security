@@ -7,14 +7,16 @@ import Button from "@//component/Button";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function url() {
-  // const {url} = useLocalSearchParams();
+  let {url} = useLocalSearchParams();
+  url = decodeURIComponent(url as string);
+
   const navigation = useNavigation();
   const router = useRouter();
 
-  const url =
-    "file:///data/user/0/com.schoolproj.campus/cache/Camera/f6f5f6ab-4f60-41fc-9ef1-03d450467a96.mp4";
+  // const url =
+  //   "file:///data/user/0/com.schoolproj.campus/cache/Camera/f6f5f6ab-4f60-41fc-9ef1-03d450467a96.mp4";
 
-  const player = useVideoPlayer(url, (player) => {
+  const player = useVideoPlayer(url as string, (player) => {
     player.loop = true;
     player.play();
   });
@@ -29,7 +31,7 @@ export default function url() {
   return (
     <View style={styles.container}>
       <View style={{ flex: 1, overflow: "hidden", position: "relative" }}>
-        <VideoView style={styles.video} player={player}></VideoView>
+        <VideoView style={styles.video} player={player} nativeControls={false}></VideoView>
         <View style={{ position: "absolute", paddingVertical: 20, paddingHorizontal: 10 }}>
           <TouchableOpacity onPress={() => {router.back()}}>
             <Ionicons name="arrow-back-outline" size={25} color="white" />
@@ -44,7 +46,7 @@ export default function url() {
           title="Download"
           LeftIcon={<Ionicons name="download-outline" size={20} />}
         />
-        <Button onPress={() => {}} style={{ flex: 1 }} title="Next" />
+        <Button onPress={() => {router.push("upload")}} style={{ flex: 1 }} title="Next" />
       </View>
     </View>
   );
