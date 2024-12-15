@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect } from "react";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEvent } from "expo";
-import Button from "@//component/Button";
+import Button from "@/component/Button";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function url() {
