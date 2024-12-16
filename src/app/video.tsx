@@ -80,7 +80,7 @@ export default function video() {
     const video = await cameraRef.current?.recordAsync({});
     if (!video?.uri) return;
 
-    const route = `preview/${encodeURIComponent(video.uri)}`;
+    const route = `post/${encodeURIComponent(video.uri)}/preview`;
     router.push(route);
     console.log("video", route);
   };

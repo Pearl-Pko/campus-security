@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import AppProvider from "../component/(app)/AppProvider";
+import firebase from '@react-native-firebase/app';
 
 export default function RootLayout() {
   return (
@@ -7,7 +8,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="video" />
-        <Stack.Screen name="preview" />
+        {/* <Stack.Screen name="preview" /> */}
       </Stack>
     </AppProvider>
   );
