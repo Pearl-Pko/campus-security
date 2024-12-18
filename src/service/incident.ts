@@ -1,4 +1,3 @@
-import { db } from "@/component/(app)/AppProvider";
 import { CreateIncidentDTO } from "@/schema/incident";
 import firestore, { GeoPoint, getFirestore, serverTimestamp } from "@react-native-firebase/firestore";
 

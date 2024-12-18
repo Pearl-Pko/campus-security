@@ -32,7 +32,7 @@ export default function Button({
 
   const backgroundColorVariants: Record<variant, ColorValue> = {
     primary: "#FE2C55",
-    secondary: "lightgrey",
+    secondary: "#EEEEEE",
     white: "#FFFFFF",
   };
   return (

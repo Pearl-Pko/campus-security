@@ -24,6 +24,7 @@ export default function signin() {
     const result = await signupUser(email, password);
     if (typeof result === "string") {
     } else {
+      console.log("ds", result);
       router.push("/profile");
     }
   };
