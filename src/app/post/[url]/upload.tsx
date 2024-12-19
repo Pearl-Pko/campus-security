@@ -22,7 +22,12 @@ export default function upload() {
   const handlePost = async (draft: boolean = false) => {
     const form = getValues();
 
-    const result = await createIncidentReport({ ...form, draft, reporterId: user?.user?.uid || null });
+    const result = await createIncidentReport({
+      ...form,
+      draft,
+      reporterId: user?.user?.uid || null,
+      contentUri: url,
+    });
     console.log("after", result);
     router.push("/profile");
   };

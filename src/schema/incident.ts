@@ -27,7 +27,8 @@ export const CreateIncidentSchema = IncidentSchema.pick({
 }).extend({
     draft: z.boolean(), 
     useCurrentLocation: z.boolean(), 
-    useAnonymousReporting: z.boolean()
+    useAnonymousReporting: z.boolean(), 
+    contentUri: z.string()
 })
 
 
