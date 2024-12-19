@@ -10,11 +10,15 @@ import { Checkbox } from "react-native-paper";
 import pallets from "@/constants/pallets";
 import { createIncidentReport } from "@/service/incident";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
+import { GooglePlaceData } from "react-native-google-places-autocomplete";
+import { UploadContext, UploadContextType } from "./_layout";
 
 export default function upload() {
   const router = useRouter();
-  let { url } = useLocalSearchParams();
+  let { url } = useLocalSearchParams<{ url: string }>();
   url = decodeURIComponent(url as string);
+  const { location, setLocation } = useContext(UploadContext) as UploadContextType;
+
   const user = useContext(SessionContext) as SessionContextType;
 
   const { control, getValues } = useForm<CreateIncidentDTO>();
@@ -26,6 +30,13 @@ export default function upload() {
       ...form,
       draft,
       reporterId: user?.user?.uid || null,
+      address: location?.formatted_address || null,
+      location: location?.geometry.location
+        ? {
+            latitude: location?.geometry.location.lat || 0,
+            longitude: location?.geometry.location.lng || 0,
+          }
+        : null,
       contentUri: url,
     });
     console.log("after", result);
@@ -79,12 +90,21 @@ export default function upload() {
 
           <View style={{ gap: 5 }}>
             <Text style={{ fontSize: 15, fontWeight: 600 }}>Where did this incident happen?</Text>
-            <TouchableOpacity style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <TouchableOpacity
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+              onPress={() => router.push(`post/${encodeURIComponent(url as string)}/location`)}
+            >
               <View style={{ gap: 5, flexDirection: "row" }}>
                 <Ionicons size={20} name="location-outline" />
-                <Text>Location</Text>
+                <Text>{location?.name || "Location"}</Text>
               </View>
-              <Ionicons name="chevron-forward-outline" size={25} />
+              <TouchableOpacity
+                onPress={() => {
+                  setLocation(null);
+                }}
+              >
+                <Ionicons name={location ? "close-outline" : "chevron-forward-outline"} size={25} />
+              </TouchableOpacity>
             </TouchableOpacity>
           </View>
 

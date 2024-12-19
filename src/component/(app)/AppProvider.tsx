@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import SessionProvider from "@/context/SessionContext";
 import { PaperProvider } from "react-native-paper";
+import "react-native-get-random-values"
 
 export default function AppProvider({ children }: React.PropsWithChildren) {
   return (

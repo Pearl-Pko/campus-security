@@ -4,19 +4,20 @@ import firestore, {
   getFirestore,
   serverTimestamp,
 } from "@react-native-firebase/firestore";
-import storage from '@react-native-firebase/storage';
-
+import storage from "@react-native-firebase/storage";
 
 export const createIncidentReport = async (dto: CreateIncidentDTO) => {
-  
-  const reference = storage().ref(`/incidents/${dto.reporterId || "anonymous"}/${Date.now()}`)
+  const reference = storage().ref(
+    `/incidents/${dto.useAnonymousReporting ? "anonymous" : dto.reporterId}/${Date.now()}`,
+  );
   const task = reference.putFile(dto.contentUri);
 
   await task;
+  console.log("uploadd");
 
   const downloadUrl = await reference.getDownloadURL();
 
-  return await firestore()
+  await firestore()
     .collection("incidents")
     .add({
       reporterId: dto.useAnonymousReporting ? null : dto.reporterId || null,
@@ -30,4 +31,5 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+  console.log("never");
 };
