@@ -7,7 +7,7 @@ import Header from "@/component/basic/Header";
 import PageWrapper from "@/component/basic/PageWrapper";
 import PostDetails from "@/component/(app)/PostDetails";
 
-export default function Post() {
+export default function Report() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const incident = useGetIncident(id);
 

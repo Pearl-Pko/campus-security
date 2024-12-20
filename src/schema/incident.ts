@@ -4,7 +4,6 @@ import { UserProfileSchema } from "./profile";
 export const IncidentSchema = z.object({
     id: z.string(), 
     reporterId: z.string().nullable(), 
-    title: z.string(), 
     description: z.string().nullable(), 
     status: z.enum(["open", "in_progress", "closed"]),
     location: z.object({
@@ -23,7 +22,6 @@ export type IncidentSchema = z.infer<typeof IncidentSchema>;
 
 export const CreateIncidentSchema = IncidentSchema.pick({
     reporterId: true, 
-    title: true, 
     description: true ,
     location: true ,
     media: true, 

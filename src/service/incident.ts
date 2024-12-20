@@ -35,7 +35,6 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
     .collection("post")
     .add({
       reporterId: dto.useAnonymousReporting ? null : dto.reporterId || null,
-      title: dto.title || null,
       description: dto.description || null,
       status: "open",
       location: dto.location ? new GeoPoint(dto.location.latitude, dto.location.longitude) : null,

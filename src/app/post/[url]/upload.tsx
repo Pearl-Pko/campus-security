@@ -49,25 +49,6 @@ export default function upload() {
       <View style={{ justifyContent: "space-between", flex: 1, marginTop: 15 }}>
         <View style={{ gap: 5 }}>
           <View style={{ gap: 3 }}>
-            <Text style={{ fontWeight: "600", fontSize: 15 }}>Add Title</Text>
-            <Controller
-              control={control}
-              name="title"
-              render={({ field: { value, onChange } }) => {
-                return (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    multiline
-                    // numberOfLines={10}
-                    placeholder="Add title"
-                    textAlignVertical="top"
-                  />
-                );
-              }}
-            />
-          </View>
-          <View style={{ gap: 3 }}>
             <Text style={{ fontWeight: "600", fontSize: 15 }}>Describe the incident</Text>
 
             <Controller

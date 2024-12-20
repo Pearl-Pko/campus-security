@@ -1,32 +1,47 @@
 import Button from "@/component/Button";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
-import React, { useContext, useRef, useState } from "react";
-import { useRouter } from "expo-router";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useFocusEffect, useNavigation, useRouter } from "expo-router";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
-import { logoutUser } from "@/service/auth";
+import { logoutUser, useUserProfile } from "@/service/auth";
 import PageWrapper from "@/component/basic/PageWrapper";
 import Header from "@/component/basic/Header";
 import ProfilePic from "@/component/basic/Profile";
 import { SceneMap, TabBar, TabView } from "react-native-tab-view";
 import Post from "@/component/(app)/profile/Post";
 import Draft from "@/component/(app)/profile/Draft";
+import Media from "@/component/(app)/profile/Media";
 
 export default function Tab() {
   const router = useRouter();
   const user = useContext(SessionContext) as SessionContextType;
 
+  const profile = useUserProfile(user?.user?.uid);
   const [index, setIndex] = useState(0);
+  const navigation = useNavigation();
 
   const [routes] = useState([
     { key: "first", title: "Draft" },
     { key: "second", title: "Post" },
+    { key: "third", title: "Media" },
   ]);
 
   const renderScene = SceneMap({
     first: Draft,
     second: Post,
+    third: Media,
   });
+
+
+  useFocusEffect(
+    useCallback(() => {
+      user?.setCurrentPageUserId(user?.user?.uid || "");
+      return () => {
+        user?.setCurrentPageUserId("");
+      };
+    }, []),
+  );
 
   return (
     <PageWrapper style={{ paddingHorizontal: 0 }}>
@@ -53,9 +68,10 @@ export default function Tab() {
           </View>
         ) : (
           <>
-            <View style={{paddingHorizontal: 15}}>
+            <View style={{ paddingHorizontal: 15 }}>
               <Header
                 title={user.user.displayName || "Empty"}
+                titleStyle={{ fontWeight: 600 }}
                 RightIcon={
                   <TouchableOpacity onPress={() => router.push("/drawer")}>
                     <Ionicons name="menu-outline" size={25} />
@@ -65,9 +81,11 @@ export default function Tab() {
               />
             </View>
             <View style={{ justifyContent: "center", flex: 1, alignItems: "center" }}>
-              <View style={{ marginTop: 20 }}>
+              <View style={{ marginTop: 20, marginBottom: 10 }}>
                 <ProfilePic />
               </View>
+              <Text>@{profile?.data?.username}</Text>
+              <Text>{profile?.data?.bio}</Text>
               <View style={{ marginTop: 10 }}>
                 <Button
                   title="Edit profile"

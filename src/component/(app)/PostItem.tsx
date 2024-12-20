@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Pressable,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { IncidentSchema } from "@/schema/incident";
 import ProfilePic from "../basic/Profile";
 import pallets from "@/constants/pallets";
@@ -16,9 +16,11 @@ import { VideoView } from "expo-video";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { SessionContext, SessionContextType } from "@/context/SessionContext";
 
 export default function PostItem({ post }: { post: IncidentSchema }) {
   const router = useRouter();
+  const user = useContext(SessionContext) as SessionContextType;
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<"video" | "image" | null>(null);
   const generateThumbnail = async (contentUri: string) => {
@@ -66,8 +68,14 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-        <ProfilePic uri={post.reporter?.avatar} style={{ width: 40, height: 40 }} />
-        <View style={{ gap: 0, flex: 1 }}>
+        <TouchableOpacity
+          onPress={() => {
+            if (user?.currentPageUserId !== post.reporterId) router.navigate(`/profile/${post.reporterId}`);
+          }}
+        >
+          <ProfilePic uri={post.reporter?.avatar} style={{ width: 40, height: 40 }} />
+        </TouchableOpacity>
+        <View style={{ gap: 5, flex: 1 }}>
           <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
             <Text style={{ fontSize: 13 }}>{post.reporter.displayName}</Text>
             <Text style={{ color: "grey", fontSize: 13 }}>@{post.reporter.username}</Text>
@@ -78,9 +86,8 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
               {format(new Date(post.createdAt.seconds * 1000), "MMM d, yyyy")}
             </Text>
           </View>
-          <View style={{ gap: 2 }}>
+          <View style={{ gap: 5 }}>
             <View>
-              <Text style={{ fontWeight: 600 }}>{post.title}</Text>
               <Text numberOfLines={5}>{post.description}</Text>
             </View>
             <Pressable style={{ position: "relative" }}>

@@ -5,6 +5,7 @@ import PageWrapper from "@/component/basic/PageWrapper";
 import { useGetAllIncidents } from "@/service/incident";
 import PostItem from "@/component/(app)/PostItem";
 import PostList from "@/component/(app)/PostList";
+import pallets from "@/constants/pallets";
 
 export default function Tab() {
   const router = useRouter();
@@ -23,8 +24,8 @@ export default function Tab() {
       >
         <Text style={{ fontSize: 20, fontWeight: 600 }}>Reports</Text>
         <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-          <Text>SOS</Text>
-          <Ionicons name="megaphone-outline" size={16} />
+          <Text style={{color: pallets.colors.primary}}>SOS</Text>
+          <Ionicons name="megaphone-outline" size={16} color={ pallets.colors.primary} />
         </TouchableOpacity>
       </View>
 

@@ -6,7 +6,9 @@ export default function RootLayout() {
   return (
     <AppProvider>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(tabs)" options={{
+          
+        }}/>
         {/* <Stack.Screen name="preview" /> */}
       </Stack>
     </AppProvider>

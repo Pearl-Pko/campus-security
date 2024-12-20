@@ -63,7 +63,9 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
   return (
     <View style={{ backgroundColor: "white", padding: 15, flex: 1 }}>
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-        <ProfilePic uri={post.reporter?.avatar} style={{ width: 40, height: 40 }} />
+        <TouchableOpacity onPress={() => router.dismissTo(`/profile/${post.reporterId}`)}>
+          <ProfilePic uri={post.reporter?.avatar} style={{ width: 40, height: 40 }} />
+        </TouchableOpacity>
         <View style={{ gap: 0, flex: 1 }}>
           <View>
             <Text style={{ fontSize: 13 }}>{post.reporter.displayName}</Text>
@@ -72,14 +74,13 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
         </View>
       </View>
       {post.address && (
-        <View style={{flexDirection: "row", gap: 5, marginTop: 10}}>
-          <Ionicons name="location-outline"  size={15}/>
+        <View style={{ flexDirection: "row", gap: 5, marginTop: 10 }}>
+          <Ionicons name="location-outline" size={15} />
           <Text style={{ fontSize: 13, color: "grey", flex: 1 }}>{post.address}</Text>
         </View>
       )}
       <View style={{ gap: 2, marginTop: 5 }}>
         <View>
-          <Text style={{ fontWeight: 600 }}>{post.title}</Text>
           <Text>{post.description}</Text>
         </View>
 
@@ -108,7 +109,7 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
           )}
         </Pressable>
       </View>
-      <Text style={{ fontSize: 13, marginTop: 5 , color: "grey", alignSelf: "flex-end"}}>
+      <Text style={{ fontSize: 13, marginTop: 5, color: "grey", alignSelf: "flex-end" }}>
         {format(new Date(post.createdAt.seconds * 1000), "h:mm MMM d, yyyy")}
       </Text>
     </View>
