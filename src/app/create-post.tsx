@@ -33,6 +33,8 @@ const circumference = radius * Math.PI * 2;
 export default function video() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
+  const [mode, setMode] = useState<"video" | "picture">("picture");
+  const [pictureUri, setPictureUri] = useState("");
 
   const [permission, requestPermission] = useCameraPermissions();
   const paused = useSharedValue<boolean>(true);
@@ -73,23 +75,38 @@ export default function video() {
     } as any;
   });
 
-  const startRecording = async () => {
-    paused.value = false;
-    setRecording(true);
-    console.log("damn");
-    const video = await cameraRef.current?.recordAsync({});
-    if (!video?.uri) return;
+  const startCapture = async (mode : "picture" | "video") => {
+    setMode(mode);
+    if (mode == "video") {
+      paused.value = false;
+      setRecording(true);
+      const video = await cameraRef.current?.recordAsync({});
+      if (!video?.uri) return;
+      console.log("start vdeo");
 
-    const route = `post/${encodeURIComponent(video.uri)}/preview`;
-    router.push(route);
-    console.log("video", route);
+      const route = `post/${encodeURIComponent(video.uri)}/preview`;
+      router.push({pathname: route, params: {mode}});
+    } else {
+      const picture = await cameraRef.current?.takePictureAsync({});
+      if (!picture?.uri) return;
+      console.log("start pic", picture.uri);
+
+      setPictureUri(picture.uri);
+    }
   };
 
-  const endRecording = async () => {
-    paused.value = true;
-    setRecording(false);
-    cameraRef.current?.stopRecording();
-    console.log("end");
+  const endCapture = async () => {
+    if (mode === "video") {
+      paused.value = true;
+      setRecording(false);
+
+      cameraRef.current?.stopRecording();
+      console.log("end video");
+    } else {
+      console.log("end pic", pictureUri);
+      const route = `post/${encodeURIComponent(pictureUri)}/preview`;
+      router.push({pathname: route, params: {mode}});
+    }
   };
 
   useEffect(() => {
@@ -183,10 +200,13 @@ export default function video() {
           <View style={{ height: 100, justifyContent: "center" }}>
             <Pressable
               onPressIn={() => {
-                startRecording();
+                startCapture("picture");
+              }}
+              onLongPress={() => {
+                startCapture("video");
               }}
               onPressOut={() => {
-                endRecording();
+                endCapture();
               }}
               style={styles.svg}
             >

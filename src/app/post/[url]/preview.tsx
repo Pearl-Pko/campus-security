@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import React, { useEffect, useLayoutEffect } from "react";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -7,20 +7,17 @@ import Button from "@/component/Button";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function url() {
-  const { url } = useLocalSearchParams();
+  const { url, mode } = useLocalSearchParams<{ url: string; mode: "video" | "picture" }>();
   const decodedUrl = decodeURIComponent(url as string);
 
   const navigation = useNavigation();
   const router = useRouter();
 
-  // const url =
-  //   "file:///data/user/0/com.schoolproj.campus/cache/Camera/f6f5f6ab-4f60-41fc-9ef1-03d450467a96.mp4";
-
   const player = useVideoPlayer(url as string, (player) => {
     player.loop = true;
     player.play();
   });
-
+  
   const handleDownload = () => {};
 
   const handleNext = () => {
@@ -28,16 +25,27 @@ export default function url() {
     router.push(route);
   };
 
+  // 
+  console.log("mode",mode,url )
+
+
   const { isPlaying } = useEvent(player, "playingChange", { isPlaying: player.playing });
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false, headerTitle: "dwl", header: () => null });
   }, [navigation]);
 
+  console.log("stay");
   return (
     <View style={styles.container}>
       <View style={{ flex: 1, overflow: "hidden", position: "relative" }}>
-        <VideoView style={styles.video} player={player} nativeControls={false}></VideoView>
+        {mode === "video" ? (
+          <VideoView style={styles.video} player={player} nativeControls={false}></VideoView>
+        ) : (
+          <View style={{flex: 1}}>
+            <Image source={{uri: url}} style={{height: "100%", width: "100%", flex: 1, resizeMode: "cover"}}/>
+          </View>
+        )}
         <View style={{ position: "absolute", paddingVertical: 20, paddingHorizontal: 10 }}>
           <TouchableOpacity
             onPress={() => {

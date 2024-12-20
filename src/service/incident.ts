@@ -19,6 +19,7 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
 
   await task;
   console.log("uploadd");
+  
 
   const downloadUrl = await reference.getDownloadURL();
   const userProfile =

@@ -10,6 +10,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarActiveTintColor: "black",
+          
 
           tabBarIcon: ({ color }) => <Ionicons size={28} name="home" color={color} />,
         }}
