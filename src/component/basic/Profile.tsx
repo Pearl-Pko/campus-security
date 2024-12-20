@@ -1,7 +1,7 @@
 import { View, Text, Image, ImageSourcePropType, StyleProp, ImageStyle } from "react-native";
 import React from "react";
 
-export default function Profile({
+export default function ProfilePic({
   style,
   uri
 }: {

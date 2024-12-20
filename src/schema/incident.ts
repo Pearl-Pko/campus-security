@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UserProfileSchema } from "./profile";
 
 export const IncidentSchema = z.object({
     id: z.string(), 
@@ -11,11 +12,14 @@ export const IncidentSchema = z.object({
         longitude: z.number(),
     }).nullable(), 
     address: z.string().nullable(),
-    publishedAt: z.date().nullable(), 
+    publishedAt: z.date().nullable(),
+    reporter: UserProfileSchema, 
     media: z.string(), 
-    createdAt: z.date(), 
-    updatedAt: z.date(), 
+    createdAt: z.object({nanoseconds: z.number(), seconds: z.number()}), 
+    updatedAt: z.object({nanoseconds: z.number(), seconds: z.number()}), 
 })
+
+export type IncidentSchema = z.infer<typeof IncidentSchema>;
 
 export const CreateIncidentSchema = IncidentSchema.pick({
     reporterId: true, 

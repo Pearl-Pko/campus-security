@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity} from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import PageWrapper from "@/component/basic/PageWrapper";
 import Header from "@/component/basic/Header";
-import Profile from "@/component/basic/Profile";
+import ProfilePic from "@/component/basic/Profile";
 import { getUserProfile, useUserProfile } from "@/service/auth";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
 import { UserProfileSchema } from "@/schema/profile";
@@ -24,7 +24,7 @@ export default function editprofile() {
       <Header title="Edit profile" titleStyle={{ fontWeight: 600 }} />
       <View style={{ marginTop: 40 }}>
         <View style={{ justifyContent: "center", alignItems: "center", gap: 5 }}>
-          <Profile uri={userProfile?.avatar} />
+          <ProfilePic uri={userProfile?.avatar} />
           <Text>Change photo</Text>
         </View>
         <Text style={{ color: "grey" }}>About you</Text>

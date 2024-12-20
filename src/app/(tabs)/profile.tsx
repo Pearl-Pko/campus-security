@@ -7,7 +7,7 @@ import { SessionContext, SessionContextType } from "@/context/SessionContext";
 import { logoutUser } from "@/service/auth";
 import PageWrapper from "@/component/basic/PageWrapper";
 import Header from "@/component/basic/Header";
-import Profile from "@/component/basic/Profile";
+import ProfilePic from "@/component/basic/Profile";
 import { SceneMap, TabBar, TabView } from "react-native-tab-view";
 import Post from "@/component/(app)/profile/Post";
 import Draft from "@/component/(app)/profile/Draft";
@@ -29,7 +29,7 @@ export default function Tab() {
   });
 
   return (
-    <PageWrapper>
+    <PageWrapper style={{ paddingHorizontal: 0 }}>
       <View style={styles.content}>
         {!user?.user ? (
           <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -53,19 +53,20 @@ export default function Tab() {
           </View>
         ) : (
           <>
-            <Header
-              title={user.user.displayName || "Empty"}
-              RightIcon={
-                <TouchableOpacity onPress={() => router.push("/drawer") }>
-                  <Ionicons name="menu-outline" size={25} />
-                </TouchableOpacity>
-              }
-              LeftIcon={<></>}
-
-            />
+            <View style={{paddingHorizontal: 15}}>
+              <Header
+                title={user.user.displayName || "Empty"}
+                RightIcon={
+                  <TouchableOpacity onPress={() => router.push("/drawer")}>
+                    <Ionicons name="menu-outline" size={25} />
+                  </TouchableOpacity>
+                }
+                LeftIcon={<></>}
+              />
+            </View>
             <View style={{ justifyContent: "center", flex: 1, alignItems: "center" }}>
               <View style={{ marginTop: 20 }}>
-                <Profile />
+                <ProfilePic />
               </View>
               <View style={{ marginTop: 10 }}>
                 <Button
@@ -77,9 +78,9 @@ export default function Tab() {
                   style={{ paddingHorizontal: 15 }}
                 />
               </View>
-              <View style={{ flex: 1, marginTop: 5 }}>
+              <View style={{ flex: 1, marginTop: 5, width: "100%", backgroundColor: "red" }}>
                 <TabView
-                  style={{ backgroundColor: "white" }}
+                  style={{ backgroundColor: "white", padding: 0, margin: 0 }}
                   navigationState={{ index, routes }}
                   renderScene={renderScene}
                   onIndexChange={setIndex}
