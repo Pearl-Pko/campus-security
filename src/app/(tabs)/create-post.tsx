@@ -34,7 +34,8 @@ export default function video() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
   const [mode, setMode] = useState<"video" | "picture">("picture");
-  const [pictureUri, setPictureUri] = useState("");
+  // const [pictureUri, setPictureUri] = useState("");
+  const pictureUri = useRef<string | null>(null);
 
   const [permission, requestPermission] = useCameraPermissions();
   const paused = useSharedValue<boolean>(true);
@@ -75,7 +76,7 @@ export default function video() {
     } as any;
   });
 
-  const startCapture = async (mode : "picture" | "video") => {
+  const startCapture = async (mode: "picture" | "video") => {
     setMode(mode);
     if (mode == "video") {
       paused.value = false;
@@ -85,13 +86,13 @@ export default function video() {
       console.log("start vdeo");
 
       const route = `post/${encodeURIComponent(video.uri)}/preview`;
-      router.push({pathname: route, params: {mode}});
+      router.push({ pathname: route, params: { mode } });
     } else {
       const picture = await cameraRef.current?.takePictureAsync({});
       if (!picture?.uri) return;
       console.log("start pic", picture.uri);
-
-      setPictureUri(picture.uri);
+      pictureUri.current = picture.uri;
+      // setPictureUri(picture.uri);
     }
   };
 
@@ -104,8 +105,12 @@ export default function video() {
       console.log("end video");
     } else {
       console.log("end pic", pictureUri);
-      const route = `post/${encodeURIComponent(pictureUri)}/preview`;
-      router.push({pathname: route, params: {mode}});
+      if (!pictureUri.current) {
+        console.log("nothing");
+        return;
+      }
+      const route = `post/${encodeURIComponent(pictureUri.current)}/preview`;
+      router.push({ pathname: route, params: { mode } });
     }
   };
 
@@ -175,8 +180,8 @@ export default function video() {
             {/* <Text>a</Text> */}
           </View>
           {/* {recording ? (
-          ) : (
-          )} */}
+            ) : (
+            )} */}
           {!recording && (
             <View
               style={{

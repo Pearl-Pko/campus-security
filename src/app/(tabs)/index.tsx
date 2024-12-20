@@ -1,39 +1,43 @@
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import PageWrapper from "@/component/basic/PageWrapper";
+import { useGetAllIncidents } from "@/service/incident";
+import PostItem from "@/component/(app)/PostItem";
+import PostList from "@/component/(app)/PostList";
 
 export default function Tab() {
   const router = useRouter();
+  const incidents = useGetAllIncidents();
 
   return (
-    <View style={styles.container}>
-      <Text>Tab [Home|Settings]</Text>
-
-      <Link href="create-post" asChild>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#1E96FC",
-            position: "absolute",
-            width: 60,
-            height: 60,
-            borderRadius: 100,
-            right: 20,
-            bottom: 20,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <FontAwesome name="plus" color="white" size={20} />
+    <PageWrapper style={styles.container}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 15,
+          paddingVertical: 10,
+        }}
+      >
+        <Text style={{ fontSize: 20, fontWeight: 600 }}>Reports</Text>
+        <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+          <Text>SOS</Text>
+          <Ionicons name="megaphone-outline" size={16} />
         </TouchableOpacity>
-      </Link>
-    </View>
+      </View>
+
+      <View style={{ flex: 1 }}>
+        <PostList incidents={incidents} />
+      </View>
+    </PageWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    paddingHorizontal: 0,
   },
 });

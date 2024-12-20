@@ -19,7 +19,7 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
 
   await task;
   console.log("uploadd");
-  
+
 
   const downloadUrl = await reference.getDownloadURL();
   const userProfile =
@@ -53,7 +53,7 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
   console.log("never");
 };
 
-export const useGetIncidents =  (uid: string, draft: boolean) : IncidentSchema[] => {
+export const useGetUserIncidents =  (uid: string, draft: boolean) : IncidentSchema[] => {
   const [incidents, setIncidents] = useState<IncidentSchema[]>([]);
   useEffect(() => {
     const unsubscribe = firestore()
@@ -77,3 +77,24 @@ export const useGetIncidents =  (uid: string, draft: boolean) : IncidentSchema[]
 
   return incidents;
 };
+
+export const useGetAllIncidents = () : IncidentSchema[] => {
+  const [incidents, setIncidents] = useState<IncidentSchema[]>([]);
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collectionGroup("post")
+      .onSnapshot((snapshot) => {
+        setIncidents(
+          snapshot.docs.map((doc) => {
+            return doc.data() as IncidentSchema;
+          }),
+        );
+      });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  return incidents;
+}
