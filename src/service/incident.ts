@@ -20,7 +20,6 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
   await task;
   console.log("uploadd");
 
-
   const downloadUrl = await reference.getDownloadURL();
   const userProfile =
     dto.reporterId && !dto.useAnonymousReporting
@@ -28,7 +27,7 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
       : { displayName: "Anonymous", avatar: null, username: "Anonymous" };
 
   console.log("dd");
-  await firestore()
+  const incident = await firestore()
     .collection("users")
     .doc(`${dto.useAnonymousReporting ? "anonymous" : dto.reporterId}`)
     .collection("incidents")
@@ -46,14 +45,15 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
       publishedAt: dto.draft ? null : serverTimestamp(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    })
-    .catch((error) => {
-      console.error(error);
     });
+  await incident.update({
+    id: incident.id,
+  });
   console.log("never");
+  return incident;
 };
 
-export const useGetUserIncidents =  (uid: string, draft: boolean) : IncidentSchema[] => {
+export const useGetUserIncidents = (uid: string, draft: boolean): IncidentSchema[] => {
   const [incidents, setIncidents] = useState<IncidentSchema[]>([]);
   useEffect(() => {
     const unsubscribe = firestore()
@@ -78,7 +78,7 @@ export const useGetUserIncidents =  (uid: string, draft: boolean) : IncidentSche
   return incidents;
 };
 
-export const useGetAllIncidents = () : IncidentSchema[] => {
+export const useGetAllIncidents = (): IncidentSchema[] => {
   const [incidents, setIncidents] = useState<IncidentSchema[]>([]);
   useEffect(() => {
     const unsubscribe = firestore()
@@ -86,7 +86,7 @@ export const useGetAllIncidents = () : IncidentSchema[] => {
       .onSnapshot((snapshot) => {
         setIncidents(
           snapshot.docs.map((doc) => {
-            return doc.data() as IncidentSchema;
+            return { ...doc.data(), id: doc.id } as IncidentSchema;
           }),
         );
       });
@@ -97,4 +97,24 @@ export const useGetAllIncidents = () : IncidentSchema[] => {
   }, []);
 
   return incidents;
-}
+};
+
+export const useGetIncident = (id: string) => {
+  const [incident, setIncident] = useState<IncidentSchema | null>(null);
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collectionGroup("post")
+      .where("id", "==", id)
+      .onSnapshot((snapshot) => {
+        if (!snapshot?.docs || snapshot?.docs?.length === 0) return;
+
+        setIncident({ ...snapshot.docs?.[0].data() } as IncidentSchema);
+      });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [id]);
+
+  return incident;
+};

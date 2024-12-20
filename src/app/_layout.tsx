@@ -7,7 +7,6 @@ export default function RootLayout() {
     <AppProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="create-post" />
         {/* <Stack.Screen name="preview" /> */}
       </Stack>
     </AppProvider>

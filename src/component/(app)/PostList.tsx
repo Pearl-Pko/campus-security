@@ -12,7 +12,7 @@ export default function PostList({ incidents }: { incidents: IncidentSchema[] })
       showsVerticalScrollIndicator={false}
       ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: "#DDDDDD" }}></View>}
       renderItem={({ item }) => {
-        return <PostItem post={item} />;
+        return <PostItem post={item}/>;
       }}
     />
   );

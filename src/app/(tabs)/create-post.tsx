@@ -7,7 +7,7 @@ import {
   Pressable,
   TouchableOpacity,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Svg, { Circle } from "react-native-svg";
 import { Camera, CameraType, CameraView, FlashMode, useCameraPermissions } from "expo-camera";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
@@ -20,7 +20,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { withPause } from "react-native-redash";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedText = Animated.createAnimatedComponent(TextInput);
@@ -33,6 +33,8 @@ const circumference = radius * Math.PI * 2;
 export default function video() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
+  const [key, setKey] = useState(0);
+
   const [mode, setMode] = useState<"video" | "picture">("picture");
   // const [pictureUri, setPictureUri] = useState("");
   const pictureUri = useRef<string | null>(null);
@@ -114,13 +116,9 @@ export default function video() {
     }
   };
 
-  useEffect(() => {
-    strokeOffset.value = withPause(
-      withTiming(0, { duration: duration, easing: Easing.linear }),
-      paused,
-    );
-    // cancelAnimation(strokeOffset);
-  }, []);
+  // useEffect(() => {
+  //   // cancelAnimation(strokeOffset);
+  // }, []);
 
   useEffect(() => {
     (async () => {
@@ -129,6 +127,31 @@ export default function video() {
       // setHasPermission(cameraStatus === "granted" && audioStatus === "granted");
     })();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      strokeOffset.value = 1;
+
+      strokeOffset.value = withPause(
+        withTiming(0, { duration: duration, easing: Easing.linear }),
+        paused,
+      );
+      console.log("stroke offset focused", strokeOffset.value);
+
+      setKey(key => key + 1);
+      
+      return () => {
+        console.log("Screen is unfocused");
+        pictureUri.current = null;
+        paused.value = true;
+        strokeOffset.value = 1;
+        console.log("stroke offset unfocused", strokeOffset.value);
+      };
+    }, []),
+  );
+
+  // console.log("stroke main", strokeOffset.get());
+
 
   if (!permission) {
     return <View />;

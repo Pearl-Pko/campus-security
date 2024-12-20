@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Pressable,
+  TouchableWithoutFeedback,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { IncidentSchema } from "@/schema/incident";
@@ -17,14 +18,16 @@ import * as VideoThumbnails from "expo-video-thumbnails";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-export default function PostItem({ post }: { post: IncidentSchema }) {
+export default function PostDetails({ post }: { post: IncidentSchema }) {
   const router = useRouter();
+  const blankProfile = require("../../../assets/images/blank-profile-picture.png");
+
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<"video" | "image" | null>(null);
   const generateThumbnail = async (contentUri: string) => {
     try {
       const { uri } = await VideoThumbnails.getThumbnailAsync(contentUri, {
-        // time: 15000,
+        time: 15000,
       });
       return uri;
     } catch (e) {
@@ -55,49 +58,60 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
     })();
   }, [post, mediaType]);
 
-  console.log(videoThumbnail);
+  console.log(videoThumbnail, mediaType, post.media);
 
   return (
-    <TouchableHighlight
-      underlayColor="#EEEEEE"
-      style={{ backgroundColor: "white", padding: 15 }}
-      onPress={() => {
-        router.push(`/report/${post.id}`);
-      }}
-    >
+    <View style={{ backgroundColor: "white", padding: 15, flex: 1 }}>
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
         <ProfilePic uri={post.reporter?.avatar} style={{ width: 40, height: 40 }} />
         <View style={{ gap: 0, flex: 1 }}>
-          <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+          <View>
             <Text style={{ fontSize: 13 }}>{post.reporter.displayName}</Text>
             <Text style={{ color: "grey", fontSize: 13 }}>@{post.reporter.username}</Text>
-            <View
-              style={{ backgroundColor: "lightgrey", width: 5, height: 5, borderRadius: 100 }}
-            ></View>
-            <Text style={{ color: "grey", fontSize: 13 }}>
-              {format(new Date(post.createdAt.seconds * 1000), "MMM d, yyyy")}
-            </Text>
-          </View>
-          <View style={{ gap: 2 }}>
-            <View>
-              <Text style={{ fontWeight: 600 }}>{post.title}</Text>
-              <Text numberOfLines={5}>{post.description}</Text>
-            </View>
-            <Pressable style={{ position: "relative" }}>
-              {mediaType === "image" && <Image style={styles.image} source={{ uri: post.media }} />}
-              {mediaType === "video" && videoThumbnail && (
-                <>
-                  <Image style={styles.image} source={{ uri: videoThumbnail }} />
-                  <View style={styles.icon}>
-                    <Ionicons name="play" color="white" size={30} />
-                  </View>
-                </>
-              )}
-            </Pressable>
           </View>
         </View>
       </View>
-    </TouchableHighlight>
+      {post.address && (
+        <View style={{flexDirection: "row", gap: 5, marginTop: 10}}>
+          <Ionicons name="location-outline"  size={15}/>
+          <Text style={{ fontSize: 13, color: "grey", flex: 1 }}>{post.address}</Text>
+        </View>
+      )}
+      <View style={{ gap: 2, marginTop: 5 }}>
+        <View>
+          <Text style={{ fontWeight: 600 }}>{post.title}</Text>
+          <Text>{post.description}</Text>
+        </View>
+
+        <Pressable style={{ position: "relative" }}>
+          {mediaType === "image" && <Image style={styles.image} source={{ uri: post.media }} />}
+          {mediaType === "video" && videoThumbnail && (
+            <>
+              <Image
+                style={styles.image}
+                source={{ uri: videoThumbnail }}
+                onError={(error) => {
+                  console.error("error", error);
+                }}
+                onLoad={() => {
+                  console.log("fine");
+                }}
+                onProgress={() => {
+                  console.log("poe");
+                }}
+              />
+
+              <View style={styles.icon}>
+                <Ionicons name="play" color="white" size={30} />
+              </View>
+            </>
+          )}
+        </Pressable>
+      </View>
+      <Text style={{ fontSize: 13, marginTop: 5 , color: "grey", alignSelf: "flex-end"}}>
+        {format(new Date(post.createdAt.seconds * 1000), "h:mm MMM d, yyyy")}
+      </Text>
+    </View>
   );
 }
 
@@ -106,7 +120,7 @@ const styles = StyleSheet.create({
     width: "auto",
     height: 200,
     borderRadius: 15,
-    flex: 1,
+    // flex: 1,
     resizeMode: "cover",
   },
   icon: {
