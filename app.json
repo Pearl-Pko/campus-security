@@ -32,7 +32,13 @@
         "expo-video",
         {
           "supportsBackgroundPlayback": true,
-          "supportsPictureInPicture": true
+          "supportsPictureInPicture": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
       ]
     ]

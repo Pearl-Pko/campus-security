@@ -5,10 +5,14 @@ import { Pressable, TouchableOpacity, View } from "react-native";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: "black", headerShown: false,
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: "black",
+        headerShown: false,
 
-      tabBarButton: (props) => <Pressable {...props} android_ripple={{ color: 'transparent' }}/>
-      }}>
+        tabBarButton: (props) => <Pressable {...props} android_ripple={{ color: "transparent" }} />,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -20,8 +24,8 @@ export default function TabLayout() {
         name="create-post"
         options={{
           tabBarStyle: {
-            display: "none", 
-            height: 0
+            display: "none",
+            height: 0,
             // backgroundColor: 'red'
           },
           tabBarIcon: ({ color }) => (

@@ -23,7 +23,7 @@ export default function Tab() {
         }}
       >
         <Text style={{ fontSize: 20, fontWeight: 600 }}>Reports</Text>
-        <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+        <TouchableOpacity onPress={() => router.push("/sos")} style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
           <Text style={{color: pallets.colors.primary}}>SOS</Text>
           <Ionicons name="megaphone-outline" size={16} color={ pallets.colors.primary} />
         </TouchableOpacity>

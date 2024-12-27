@@ -1,10 +1,11 @@
-import { CreateIncidentDTO, IncidentSchema } from "@/schema/incident";
+import { CreateIncidentDTO, IncidentSchema, Sos } from "@/schema/incident";
 import firestore, {
   collection,
   GeoPoint,
   getFirestore,
   query,
   serverTimestamp,
+  Timestamp,
   where,
 } from "@react-native-firebase/firestore";
 import storage from "@react-native-firebase/storage";
@@ -117,3 +118,14 @@ export const useGetIncident = (id: string) => {
 
   return incident;
 };
+
+export const sendSoS = async ({longitude, latitude, userId, id, lastUpdated} : Sos) => {
+  return await firestore().collection("sos").doc(id).set({
+    longitude: longitude,
+    latitude: latitude, 
+    userId: userId, 
+    id: id, 
+    lastUpdated: Timestamp.fromDate(lastUpdated)
+  });
+
+}
