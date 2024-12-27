@@ -64,7 +64,7 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
       underlayColor="#EEEEEE"
       style={{ backgroundColor: "white", padding: 15 }}
       onPress={() => {
-        router.push(`/report/${post.id}`);
+        router.navigate(`/report/${post.id}`);
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>

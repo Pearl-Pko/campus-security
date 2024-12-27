@@ -12,6 +12,7 @@ import { createIncidentReport } from "@/service/incident";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { UploadContext, UploadContextType } from "./_layout";
+import * as Location from "expo-location";
 
 export default function upload() {
   const router = useRouter();
@@ -21,27 +22,46 @@ export default function upload() {
 
   const user = useContext(SessionContext) as SessionContextType;
 
-  const { control, getValues } = useForm<CreateIncidentDTO>();
+  const { control, getValues, watch } = useForm<CreateIncidentDTO>();
 
   const handlePost = async (draft: boolean = false) => {
     const form = getValues();
+
+    let currentLocation: Location.LocationObject | null = null;
+    let currentAddress: Location.LocationGeocodedAddress[] | null = null;
+
+    if (form.useCurrentLocation) {
+      currentLocation = await Location.getCurrentPositionAsync();
+      currentAddress = await Location.reverseGeocodeAsync(currentLocation.coords);
+    }
 
     const result = await createIncidentReport({
       ...form,
       draft,
       reporterId: user?.user?.uid || null,
-      address: location?.formatted_address || null,
-      location: location?.geometry.location
-        ? {
-            latitude: location?.geometry.location.lat || 0,
-            longitude: location?.geometry.location.lng || 0,
-          }
-        : null,
+      address:
+        (form.useCurrentLocation
+          ? currentAddress?.[0].formattedAddress
+          : location?.formatted_address) || null,
+      location:
+        form.useCurrentLocation && currentLocation
+          ? {
+              latitude: currentLocation?.coords.latitude || 0,
+              longitude: currentLocation?.coords.longitude || 0,
+            }
+          : location?.geometry.location
+            ? {
+                latitude: location?.geometry.location.lat || 0,
+                longitude: location?.geometry.location.lng || 0,
+              }
+            : null,
       contentUri: url,
     });
     console.log("after", result);
     router.push("/profile");
   };
+
+  const useCurrentLocation = watch("useCurrentLocation");
 
   return (
     <View style={{ flex: 1, backgroundColor: "white", padding: 15 }}>
@@ -71,57 +91,65 @@ export default function upload() {
 
           <View style={{ gap: 5 }}>
             <Text style={{ fontSize: 15, fontWeight: 600 }}>Where did this incident happen?</Text>
-            <TouchableOpacity
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-              onPress={() => router.push(`post/${encodeURIComponent(url as string)}/location`)}
-            >
-              <View style={{ gap: 5, flexDirection: "row" }}>
-                <Ionicons size={20} name="location-outline" />
-                <Text>{location?.name || "Location"}</Text>
-              </View>
+            {!useCurrentLocation && (
               <TouchableOpacity
-                onPress={() => {
-                  setLocation(null);
-                }}
+                style={{ flexDirection: "row", justifyContent: "space-between" }}
+                onPress={() => router.push(`post/${encodeURIComponent(url as string)}/location`)}
               >
-                <Ionicons name={location ? "close-outline" : "chevron-forward-outline"} size={25} />
+                <View style={{ gap: 5, flexDirection: "row" }}>
+                  <Ionicons size={20} name="location-outline" />
+                  <Text>{location?.name || "Location"}</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    setLocation(null);
+                  }}
+                >
+                  <Ionicons
+                    name={location ? "close-outline" : "chevron-forward-outline"}
+                    size={25}
+                  />
+                </TouchableOpacity>
               </TouchableOpacity>
-            </TouchableOpacity>
+            )}
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Controller
+                control={control}
+                name="useCurrentLocation"
+                render={({ field: { value, onChange } }) => {
+                  return (
+                    <Checkbox.Android
+                      uncheckedColor="grey"
+                      color={"blue"}
+                      status={value ? "checked" : "unchecked"}
+                      onPress={() => onChange(!value)}
+                    />
+                  );
+                }}
+              />
+              <Text>Use current location</Text>
+            </View>
           </View>
 
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Controller
-              control={control}
-              name="useCurrentLocation"
-              render={({ field: { value, onChange } }) => {
-                return (
-                  <Checkbox.Android
-                    uncheckedColor="grey"
-                    color={"blue"}
-                    status={value ? "checked" : "unchecked"}
-                    onPress={() => onChange(!value)}
-                  />
-                );
-              }}
-            />
-            <Text>Use current location</Text>
-          </View>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Controller
-              control={control}
-              name="useAnonymousReporting"
-              render={({ field: { value, onChange } }) => {
-                return (
-                  <Checkbox.Android
-                    uncheckedColor="grey"
-                    color={"blue"}
-                    status={value ? "checked" : "unchecked"}
-                    onPress={() => onChange(!value)}
-                  />
-                );
-              }}
-            />
-            <Text>Report anonymously</Text>
+          <View>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Controller
+                control={control}
+                name="useAnonymousReporting"
+                render={({ field: { value, onChange } }) => {
+                  return (
+                    <Checkbox.Android
+                      uncheckedColor="grey"
+                      color={"blue"}
+                      status={value ? "checked" : "unchecked"}
+                      onPress={() => onChange(!value)}
+                    />
+                  );
+                }}
+              />
+              <Text>Report anonymously</Text>
+            </View>
+            <Text style={{color: "grey", fontStyle: "italic"}}>Your profile would not be associated with this incident report</Text>
           </View>
         </View>
         <View style={{ flexDirection: "row", gap: 10 }}>
