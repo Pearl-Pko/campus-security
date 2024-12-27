@@ -13,51 +13,14 @@ import ProfilePic from "../basic/Profile";
 import pallets from "@/constants/pallets";
 import { format } from "date-fns";
 import { VideoView } from "expo-video";
-import * as VideoThumbnails from "expo-video-thumbnails";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
+import Content from "./Content";
 
 export default function PostItem({ post }: { post: IncidentSchema }) {
   const router = useRouter();
   const user = useContext(SessionContext) as SessionContextType;
-  const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
-  const [mediaType, setMediaType] = useState<"video" | "image" | null>(null);
-  const generateThumbnail = async (contentUri: string) => {
-    try {
-      const { uri } = await VideoThumbnails.getThumbnailAsync(contentUri, {
-        // time: 15000,
-      });
-      return uri;
-    } catch (e) {
-      console.warn(e);
-      return null;
-    }
-  };
-
-  const getContentType = async () => {
-    const response = await fetch(post.media, { method: "HEAD" });
-    const contentType = response.headers.get("content-type");
-    if (contentType && (contentType.includes("video") || contentType.includes("image"))) {
-      setMediaType(contentType.includes("video") ? "video" : "image");
-    } else {
-      setMediaType(null);
-    }
-  };
-
-  useEffect(() => {
-    getContentType();
-  }, [post]);
-
-  useEffect(() => {
-    (async () => {
-      if (post.media && mediaType === "video") {
-        setVideoThumbnail(await generateThumbnail(post.media));
-      }
-    })();
-  }, [post, mediaType]);
-
-  console.log(videoThumbnail);
 
   return (
     <TouchableHighlight
@@ -90,39 +53,11 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
             <View>
               <Text numberOfLines={5}>{post.description}</Text>
             </View>
-            <Pressable style={{ position: "relative" }}>
-              {mediaType === "image" && <Image style={styles.image} source={{ uri: post.media }} />}
-              {mediaType === "video" && videoThumbnail && (
-                <>
-                  <Image style={styles.image} source={{ uri: videoThumbnail }} />
-                  <View style={styles.icon}>
-                    <Ionicons name="play" color="white" size={30} />
-                  </View>
-                </>
-              )}
-            </Pressable>
+            <Content uri={post.media}/>
+            
           </View>
         </View>
       </View>
     </TouchableHighlight>
   );
 }
-
-const styles = StyleSheet.create({
-  image: {
-    width: "auto",
-    height: 200,
-    borderRadius: 15,
-    flex: 1,
-    resizeMode: "cover",
-  },
-  icon: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
