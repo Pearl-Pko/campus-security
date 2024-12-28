@@ -4,6 +4,9 @@
     "noImplicitReturns": true,
     "strict": true,
     "paths": {
+      "@assets*": [
+        "./assets*"
+      ],
       "@*": [
         "./src*"
       ]

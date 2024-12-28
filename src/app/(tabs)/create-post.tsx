@@ -6,6 +6,7 @@ import {
   TextInput,
   Pressable,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Svg, { Circle } from "react-native-svg";
@@ -21,6 +22,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { withPause } from "react-native-redash";
 import { useFocusEffect, useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { getMediaType } from "@/util/util";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedText = Animated.createAnimatedComponent(TextInput);
@@ -45,6 +48,8 @@ export default function video() {
   const [recording, setRecording] = useState<boolean>(false);
 
   const router = useRouter();
+
+  const placeholder = require("@assets/images/placeholder.jpeg");
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -120,6 +125,26 @@ export default function video() {
   //   // cancelAnimation(strokeOffset);
   // }, []);
 
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permission to access media library is required!");
+      return;
+    }
+
+    // Launch image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images", "videos"],
+      allowsEditing: false, 
+      quality: 1, 
+    });
+
+    if (!result.canceled) {
+      const route = `post/${encodeURIComponent(result.assets[0].uri)}/preview`;
+      router.push({ pathname: route, params: { mode: getMediaType(result.assets[0].mimeType!) } });
+    }
+  };
+
   useEffect(() => {
     (async () => {
       const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
@@ -138,8 +163,8 @@ export default function video() {
       );
       console.log("stroke offset focused", strokeOffset.value);
 
-      setKey(key => key + 1);
-      
+      setKey((key) => key + 1);
+
       return () => {
         console.log("Screen is unfocused");
         pictureUri.current = null;
@@ -151,7 +176,6 @@ export default function video() {
   );
 
   // console.log("stroke main", strokeOffset.get());
-
 
   if (!permission) {
     return <View />;
@@ -225,7 +249,22 @@ export default function video() {
               </TouchableOpacity>
             </View>
           )}
-          <View style={{ height: 100, justifyContent: "center" }}>
+          <View
+            style={{
+              height: 100,
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexDirection: "row",
+            }}
+          >
+            {!recording && (
+              <TouchableOpacity onPress={() => pickImage()}>
+                <Image
+                  source={placeholder}
+                  style={{ height: 50, resizeMode: "cover", width: 50, borderRadius: 10 }}
+                />
+              </TouchableOpacity>
+            )}
             <Pressable
               onPressIn={() => {
                 startCapture("picture");
@@ -256,7 +295,7 @@ export default function video() {
             </Pressable>
 
             {!recording && (
-              <View style={{ alignSelf: "flex-end" }}>
+              <View>
                 <TouchableOpacity onPress={() => toggleCameraFacing()}>
                   <Ionicons name="sync-outline" size={35} color="white" />
                 </TouchableOpacity>
