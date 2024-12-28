@@ -1,35 +1,48 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from "react-native";
 import React, { useEffect, useLayoutEffect } from "react";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEvent } from "expo";
 import Button from "@/component/Button";
 import { Ionicons } from "@expo/vector-icons";
+import * as MediaLibrary from "expo-media-library";
+import * as Sharing from "expo-sharing";
 
-export default function url() {
-  const { url, mode } = useLocalSearchParams<{ url: string; mode: "video" | "picture" }>();
-  const decodedUrl = decodeURIComponent(url as string);
+export default function uri() {
+  const { uri, mode } = useLocalSearchParams<{ uri: string; mode: "video" | "picture" }>();
+  const decodedUrl = decodeURIComponent(uri as string);
 
   const navigation = useNavigation();
   const router = useRouter();
 
-  const player = useVideoPlayer(url as string, (player) => {
+  const player = useVideoPlayer(uri as string, (player) => {
     player.loop = true;
     player.play();
   });
-  
-  const handleDownload = () => {};
-
-  const handleNext = () => {
-    const route = `post/${encodeURIComponent(url as string)}/upload`;
-    router.push(route);
-  };
-
-  // 
-  console.log("mode",mode,url )
-
 
   const { isPlaying } = useEvent(player, "playingChange", { isPlaying: player.playing });
+
+  const handleDownload = async () => {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== "granted") {
+        alert("Sorry, we need media library permissions to save files.");
+        return;
+      }
+
+      if (Platform.OS === "android") {
+        await MediaLibrary.saveToLibraryAsync(uri);
+        alert("File has been downloaded");
+      } else if (Platform.OS === "ios") {
+        await Sharing.shareAsync(uri);
+      }
+    } catch (error) {}
+  };
+
+  const handleNext = () => {
+    const route = `post/${encodeURIComponent(uri as string)}/upload`;
+    router.push(route);
+  };
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false, headerTitle: "dwl", header: () => null });
@@ -42,8 +55,11 @@ export default function url() {
         {mode === "video" ? (
           <VideoView style={styles.video} player={player} nativeControls={false}></VideoView>
         ) : (
-          <View style={{flex: 1}}>
-            <Image source={{uri: url}} style={{height: "100%", width: "100%", flex: 1, resizeMode: "cover"}}/>
+          <View style={{ flex: 1 }}>
+            <Image
+              source={{ uri: uri }}
+              style={{ height: "100%", width: "100%", flex: 1, resizeMode: "cover" }}
+            />
           </View>
         )}
         <View style={{ position: "absolute", paddingVertical: 20, paddingHorizontal: 10 }}>
@@ -60,7 +76,9 @@ export default function url() {
         <Button
           variant="white"
           style={{ flex: 1 }}
-          onPress={() => {}}
+          onPress={() => {
+            handleDownload();
+          }}
           title="Download"
           LeftIcon={<Ionicons name="download-outline" size={20} />}
         />
