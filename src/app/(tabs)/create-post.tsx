@@ -38,11 +38,8 @@ export default function video() {
   const [flash, setFlash] = useState<FlashMode>("off");
   const [key, setKey] = useState(0);
 
-  const [mode, setMode] = useState<"video" | "picture">("picture");
+  const [mode, setMode] = useState<"video" | "picture" | null>(null);
   // const [pictureUri, setPictureUri] = useState("");
-  const pictureUri = useRef<string | null>(null);
-  const isTakingPicture = useRef<boolean>(false);
-
   const [permission, requestPermission] = useCameraPermissions();
   const paused = useSharedValue<boolean>(true);
   const cameraRef = useRef<CameraView>(null);
@@ -84,10 +81,6 @@ export default function video() {
     } as any;
   });
 
-  const waitForPicture = async () => {
-    await waitUntil(() => !isTakingPicture.current);
-  };
-
   const startCapture = async (mode: "picture" | "video") => {
     setMode(mode);
     if (mode == "video") {
@@ -100,13 +93,6 @@ export default function video() {
       const route = `post/${encodeURIComponent(video.uri)}/preview`;
       router.push({ pathname: route, params: { mode } });
     } else if (mode == "picture") {
-      isTakingPicture.current = true;
-      const picture = await cameraRef.current?.takePictureAsync({});
-      if (!picture?.uri) return;
-      console.log("start pic", picture.uri);
-      pictureUri.current = picture.uri;
-      isTakingPicture.current = false;
-      // setPictureUri(picture.uri);
     }
   };
 
@@ -117,17 +103,16 @@ export default function video() {
 
       cameraRef.current?.stopRecording();
       console.log("end video");
-    } else {
-      await waitForPicture();
-      console.log("end pic", pictureUri);
+    } else if (mode == "picture") {
+      const picture = await cameraRef.current?.takePictureAsync({});
 
-      if (!pictureUri.current) {
-        console.log("nothing");
+      if (!picture?.uri) 
         return;
-      }
-      const route = `post/${encodeURIComponent(pictureUri.current)}/preview`;
+
+      const route = `post/${encodeURIComponent(picture?.uri)}/preview`;
       router.push({ pathname: route, params: { mode } });
     }
+    setMode(null);
   };
 
   // useEffect(() => {
@@ -177,8 +162,8 @@ export default function video() {
 
       return () => {
         console.log("Screen is unfocused");
-        pictureUri.current = null;
         paused.value = true;
+        setMode(null);
         strokeOffset.value = 1;
         console.log("stroke offset unfocused", strokeOffset.value);
       };
