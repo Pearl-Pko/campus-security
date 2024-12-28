@@ -33,6 +33,7 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
         <TouchableOpacity
           onPress={() => {
+            if (!post.reporterId) return;
             if (user?.currentPageUserId !== post.reporterId) router.navigate(`/profile/${post.reporterId}`);
           }}
         >
