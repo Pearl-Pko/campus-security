@@ -48,7 +48,7 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
               style={{ backgroundColor: "lightgrey", width: 5, height: 5, borderRadius: 100 }}
             ></View>
             <Text style={{ color: "grey", fontSize: 13 }}>
-              {format(new Date(post.createdAt.seconds * 1000), "MMM d, yyyy")}
+              {format(new Date(post.createdAt), "MMM d, yyyy")}
             </Text>
           </View>
           <View style={{ gap: 5 }}>

@@ -91,7 +91,7 @@ export default function video() {
       console.log("start vdeo");
 
       const route = `post/${encodeURIComponent(video.uri)}/preview`;
-      router.push({ pathname: route, params: { mode } });
+      router.navigate({ pathname: route, params: { mode } });
     } else if (mode == "picture") {
     }
   };
@@ -110,7 +110,7 @@ export default function video() {
         return;
 
       const route = `post/${encodeURIComponent(picture?.uri)}/preview`;
-      router.push({ pathname: route, params: { mode } });
+      router.navigate({ pathname: route, params: { mode } });
     }
     setMode(null);
   };
@@ -136,7 +136,7 @@ export default function video() {
     if (!result.canceled) {
       const route = `post/${encodeURIComponent(result.assets[0].uri)}/preview`;
       console.log("there", route);
-      router.push({ pathname: route, params: { mode: getMediaType(result.assets[0].mimeType!) } });
+      router.navigate({ pathname: route, params: { mode: getMediaType(result.assets[0].mimeType!) } });
     }
   };
 

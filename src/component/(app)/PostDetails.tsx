@@ -26,7 +26,7 @@ import { SessionContext, SessionContextType } from "@/context/SessionContext";
 export default function PostDetails({ post }: { post: IncidentSchema }) {
   const router = useRouter();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const isDraft = post.publishedAt === null;
+  const isDraft = post.publishedAt === null || true;
   const snapPoints = useMemo(() => [isDraft ? 220 : 100], []);
 
   const user = useContext(SessionContext) as SessionContextType;
@@ -78,7 +78,7 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
         </View>
       </View>
       <Text style={{ fontSize: 13, marginTop: 5, color: "grey", alignSelf: "flex-end" }}>
-        {format(new Date(post.createdAt.seconds * 1000), "h:mm MMM d, yyyy")}
+        {format(new Date(post.createdAt), "h:mm MMM d, yyyy")}
       </Text>
       <BottomSheetModal
         ref={bottomSheetRef}
@@ -111,6 +111,14 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
               textStyle={{ fontSize: 16 }}
               title="Edit Draft"
               variant="secondary"
+              onPress={() => {
+                const route = `post/${encodeURIComponent("url" as string)}/upload`;
+
+                router.push({
+                  pathname: route,
+                  params: { draftId: post.id },
+                });
+              }}
               style={{ flex: 1, width: "100%", borderRadius: 15 }}
               LeftIcon={<Ionicons name="create-outline" size={20} />}
             />

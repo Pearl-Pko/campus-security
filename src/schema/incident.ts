@@ -18,11 +18,33 @@ export const IncidentSchema = z.object({
   publishedAt: z.date().nullable(),
   reporter: UserProfileSchema,
   media: z.string(),
-  createdAt: FireStoreTimeStamp,
-  updatedAt: z.object({ nanoseconds: z.number(), seconds: z.number() }),
+  createdAt: z.date(),
+  updatedAt: z.date(),
 });
 
 export type IncidentSchema = z.infer<typeof IncidentSchema>;
+
+export const IncidentDraftSchema = z.object({
+  id: z.string(),
+  reporterId: z.string(),
+  description: z.string().nullable(),
+  status: z.enum(["open", "in_progress", "closed"]),
+  location: z
+    .object({
+      latitude: z.number(),
+      longitude: z.number(),
+    })
+    .nullable(),
+  address: z.string().nullable(),
+  reporter: UserProfileSchema,
+  media: z.string(),
+  createdAt: FireStoreTimeStamp,
+  updatedAt: FireStoreTimeStamp,
+  useCurrentLocation: z.boolean(),
+  useAnonymousReporting: z.boolean(),
+});
+
+export type IncidentDraftSchema = z.infer<typeof IncidentDraftSchema>;
 
 export const CreateIncidentSchema = IncidentSchema.pick({
   reporterId: true,
@@ -38,6 +60,14 @@ export const CreateIncidentSchema = IncidentSchema.pick({
 });
 
 export type CreateIncidentDTO = z.infer<typeof CreateIncidentSchema>;
+
+export const CreateIncidentDraftSchema = IncidentDraftSchema.omit({
+  media: true,
+}).extend({
+  contentUri: z.string(),
+});
+
+export type CreateIncidentDraftDto = z.infer<typeof CreateIncidentDraftSchema>;
 
 export const SoS = z.object({
   longitude: z.number(),
