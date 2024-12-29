@@ -46,8 +46,9 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
         <View>
           <Text>{post.description}</Text>
         </View>
-
-        <Content uri={post.media} />
+        <View style={{height: 200}}>
+          <Content uri={post.media} />
+        </View>
       </View>
       <Text style={{ fontSize: 13, marginTop: 5, color: "grey", alignSelf: "flex-end" }}>
         {format(new Date(post.createdAt.seconds * 1000), "h:mm MMM d, yyyy")}

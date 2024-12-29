@@ -47,7 +47,7 @@ export default function Content({ uri }: { uri: string }) {
 
   // the firebase url is encoded twice to avoid decoding issues with expo router in the subsequent screen
     const route = `preview/${encodeURIComponent(encodeURIComponent(uri))}`;
-    router.push({ pathname: route, params: { mode: mediaType } });
+    router.navigate({ pathname: route, params: { mode: mediaType } });
   };
 
   return (
@@ -70,7 +70,8 @@ export default function Content({ uri }: { uri: string }) {
 const styles = StyleSheet.create({
   image: {
     width: "auto",
-    height: 200,
+    // height: 200,
+    height: "100%",
     borderRadius: 15,
     resizeMode: "cover",
   },

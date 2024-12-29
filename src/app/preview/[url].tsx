@@ -22,14 +22,14 @@ export default function preview() {
       <View style={{ paddingHorizontal: 15 }}>
         <Header />
       </View>
-      <View style={{marginTop: 15, flex: 1}}>
+      <View style={{ flex: 1, justifyContent: "center"}}>
         {mode === "video" ? (
           <VideoView style={{flex: 1}} player={player} nativeControls={true}></VideoView>
         ) : (
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1,   justifyContent: "center", }}>
             <Image
               source={{ uri: url }}
-              style={{ width: "100%", height: "100%", resizeMode: "cover" }}
+              style={{ width: "100%", height: "100%",  resizeMode: "contain" }}
             />
           </View>
         )}

@@ -34,7 +34,8 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
         <TouchableOpacity
           onPress={() => {
             if (!post.reporterId) return;
-            if (user?.currentPageUserId !== post.reporterId) router.navigate(`/profile/${post.reporterId}`);
+            if (user?.currentPageUserId !== post.reporterId)
+              router.navigate(`/profile/${post.reporterId}`);
           }}
         >
           <ProfilePic uri={post.reporter?.avatar} style={{ width: 40, height: 40 }} />
@@ -54,8 +55,9 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
             <View>
               <Text numberOfLines={5}>{post.description}</Text>
             </View>
-            <Content uri={post.media}/>
-            
+            <View style={{height: 200}}>
+              <Content uri={post.media} />
+            </View>
           </View>
         </View>
       </View>
