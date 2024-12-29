@@ -32,7 +32,7 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
     .collection("users")
     .doc(`${dto.useAnonymousReporting ? "anonymous" : dto.reporterId}`)
     .collection("incidents")
-    .doc("published")
+    .doc(dto.draft ? "draft" : "published")
     .collection("post")
     .add({
       reporterId: dto.useAnonymousReporting ? null : dto.reporterId || null,
@@ -119,13 +119,37 @@ export const useGetIncident = (id: string) => {
   return incident;
 };
 
-export const sendSoS = async ({longitude, latitude, userId, id, lastUpdated} : Sos) => {
-  return await firestore().collection("sos").doc(id).set({
-    longitude: longitude,
-    latitude: latitude, 
-    userId: userId, 
-    id: id, 
-    lastUpdated: Timestamp.fromDate(lastUpdated)
-  });
+export const sendSoS = async ({ longitude, latitude, userId, id, lastUpdated }: Sos) => {
+  return await firestore()
+    .collection("sos")
+    .doc(id)
+    .set({
+      longitude: longitude,
+      latitude: latitude,
+      userId: userId,
+      id: id,
+      lastUpdated: Timestamp.fromDate(lastUpdated),
+    });
+};
 
-}
+export const publishDraft = () => {};
+
+export const editDraft = () => {};
+
+export const deleteReport = async (id: string) => {
+  try {
+    const querySnapshot = await firestore()
+      .collectionGroup("post")
+      .where("id", "==", id)
+      .orderBy("createdAt", "asc")
+      .get();
+
+    if (querySnapshot.empty) return;
+
+    await querySnapshot.docs[0].ref.delete();
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};

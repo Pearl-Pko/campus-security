@@ -6,9 +6,8 @@ import { FlatList } from "react-native-gesture-handler";
 import PostItem from "../PostItem";
 import PostList from "../PostList";
 
-export default function Post() {
-  const user = useContext(SessionContext) as SessionContextType;
-  const incidents = useGetUserIncidents(user?.user?.uid || "", false);
+export default function Post({uid} : {uid: string}) {
+  const incidents = useGetUserIncidents(uid, false);
 
   return (
     <View style={{ flex: 1 }}>

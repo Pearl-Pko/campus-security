@@ -13,11 +13,12 @@ import { SessionContext, SessionContextType } from "@/context/SessionContext";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { UploadContext, UploadContextType } from "./_layout";
 import * as Location from "expo-location";
+import uri from "./preview";
 
 export default function upload() {
   const router = useRouter();
-  let { url } = useLocalSearchParams<{ url: string }>();
-  url = decodeURIComponent(url as string);
+  let { uri } = useLocalSearchParams<{ uri: string }>();
+  uri = decodeURIComponent(uri as string);
   const { location, setLocation } = useContext(UploadContext) as UploadContextType;
 
   const user = useContext(SessionContext) as SessionContextType;
@@ -34,6 +35,7 @@ export default function upload() {
       currentLocation = await Location.getCurrentPositionAsync();
       currentAddress = await Location.reverseGeocodeAsync(currentLocation.coords);
     }
+    console.log("create", uri);
 
     const result = await createIncidentReport({
       ...form,
@@ -55,7 +57,7 @@ export default function upload() {
                 longitude: location?.geometry.location.lng || 0,
               }
             : null,
-      contentUri: url,
+      contentUri: uri,
     });
     console.log("after", result);
     router.push("/profile");
@@ -94,7 +96,7 @@ export default function upload() {
             {!useCurrentLocation && (
               <TouchableOpacity
                 style={{ flexDirection: "row", justifyContent: "space-between" }}
-                onPress={() => router.push(`post/${encodeURIComponent(url as string)}/location`)}
+                onPress={() => router.push(`post/${encodeURIComponent(uri as string)}/location`)}
               >
                 <View style={{ gap: 5, flexDirection: "row" }}>
                   <Ionicons size={20} name="location-outline" />
@@ -157,13 +159,14 @@ export default function upload() {
             style={{ flex: 1 }}
             title="Drafts"
             variant="secondary"
+            onPress={() => handlePost(true)}
             LeftIcon={<Ionicons name="folder-open-outline" size={20} />}
           />
           <Button
             style={{ flex: 1 }}
             title="Post"
             variant="primary"
-            onPress={async () => await handlePost()}
+            onPress={() => handlePost(false)}
             LeftIcon={<Ionicons name="share-outline" color="white" size={20} />}
           />
         </View>

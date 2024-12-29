@@ -7,6 +7,8 @@ import {
   TouchableOpacityProps,
   ColorValue,
   StyleSheet,
+  StyleProp,
+  TextStyle,
 } from "react-native";
 import React from "react";
 
@@ -16,10 +18,12 @@ type Props = TouchableOpacityProps & {
   variant?: variant;
   title: string;
   LeftIcon?: React.ReactElement;
+  textStyle?: StyleProp<TextStyle>
 };
 export default function Button({
   variant = "primary",
   style,
+  textStyle,
   LeftIcon,
   disabled,
   ...props
@@ -53,7 +57,7 @@ export default function Button({
     >
       {LeftIcon}
       <Text
-        style={{ color: textColorVariants[variant], paddingHorizontal: 5, paddingVertical: 10 }}
+        style={[{ color: textColorVariants[variant], paddingHorizontal: 5, paddingVertical: 10 }, textStyle]}
       >
         {props.title}
       </Text>

@@ -5,11 +5,16 @@ import PageWrapper from "@/component/basic/PageWrapper";
 import Header from "@/component/basic/Header";
 import { useUserProfile } from "@/service/auth";
 import ProfilePic from "@/component/basic/Profile";
-import { SceneMap, TabBar, TabView } from "react-native-tab-view";
+import { SceneMap, SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import Post from "@/component/(app)/profile/Post";
 import Media from "@/component/(app)/profile/Media";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
+import Draft from "@/component/(app)/profile/Draft";
 
+type TabRoutes = {
+  key: string;
+  title: string;
+};
 export default function User() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const profile = useUserProfile(id);
@@ -22,10 +27,21 @@ export default function User() {
     { key: "second", title: "Media" },
   ]);
 
-  const renderScene = SceneMap({
-    first: Post,
-    second: Media,
-  });
+  // const renderScene = SceneMap({
+  //   first: Post,
+  //   second: Media,
+  // });
+
+  const renderScene = ({ route }: SceneRendererProps & { route: TabRoutes }) => {
+    switch (route.key) {
+      case "first":
+        return <Post uid={id} />;
+      case "second":
+        return <Draft uid={id} />;
+      default:
+        return null;
+    }
+  };
   // useEffect(() => {
   //   if (user == id) {
   //     <Redirect/>

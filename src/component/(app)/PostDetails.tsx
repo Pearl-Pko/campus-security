@@ -8,7 +8,7 @@ import {
   Pressable,
   TouchableWithoutFeedback,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { IncidentSchema } from "@/schema/incident";
 import ProfilePic from "../basic/Profile";
 import pallets from "@/constants/pallets";
@@ -16,25 +16,52 @@ import { format } from "date-fns";
 import { VideoView } from "expo-video";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Content from "./Content";
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import Button from "../Button";
+import { deleteReport } from "@/service/incident";
+import { SessionContext, SessionContextType } from "@/context/SessionContext";
 
 export default function PostDetails({ post }: { post: IncidentSchema }) {
   const router = useRouter();
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const isDraft = post.publishedAt === null;
+  const snapPoints = useMemo(() => [isDraft ? 220 : 100], []);
+
+  const user = useContext(SessionContext) as SessionContextType;
+
   const blankProfile = require("../../../assets/images/blank-profile-picture.png");
+
+  useFocusEffect(
+    useCallback(() => {
+      // No action on focus
+      return () => {
+        // Close the modal when screen is unfocused
+        bottomSheetRef.current?.dismiss();
+      };
+    }, []),
+  );
 
   return (
     <View style={{ backgroundColor: "white", padding: 15, flex: 1 }}>
-      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-        <TouchableOpacity onPress={() => router.dismissTo(`/profile/${post.reporterId}`)}>
-          <ProfilePic uri={post.reporter?.avatar} style={{ width: 40, height: 40 }} />
-        </TouchableOpacity>
-        <View style={{ gap: 0, flex: 1 }}>
-          <View>
-            <Text style={{ fontSize: 13 }}>{post.reporter.displayName}</Text>
-            <Text style={{ color: "grey", fontSize: 13 }}>@{post.reporter.username}</Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <TouchableOpacity onPress={() => router.dismissTo(`/profile/${post.reporterId}`)}>
+            <ProfilePic uri={post.reporter?.avatar} style={{ width: 40, height: 40 }} />
+          </TouchableOpacity>
+          <View style={{ gap: 0 }}>
+            <View>
+              <Text style={{ fontSize: 13 }}>{post.reporter.displayName}</Text>
+              <Text style={{ color: "grey", fontSize: 13 }}>@{post.reporter.username}</Text>
+            </View>
           </View>
         </View>
+        {post.reporterId && user?.user?.uid === post.reporterId && (
+          <TouchableOpacity onPress={() => bottomSheetRef.current?.present()}>
+            <Ionicons name="ellipsis-vertical-outline" size={20} />
+          </TouchableOpacity>
+        )}
       </View>
       {post.address && (
         <View style={{ flexDirection: "row", gap: 5, marginTop: 10 }}>
@@ -46,13 +73,61 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
         <View>
           <Text>{post.description}</Text>
         </View>
-        <View style={{height: 200}}>
+        <View style={{ height: 200 }}>
           <Content uri={post.media} />
         </View>
       </View>
       <Text style={{ fontSize: 13, marginTop: 5, color: "grey", alignSelf: "flex-end" }}>
         {format(new Date(post.createdAt.seconds * 1000), "h:mm MMM d, yyyy")}
       </Text>
+      <BottomSheetModal
+        ref={bottomSheetRef}
+        snapPoints={snapPoints}
+        enableDynamicSizing={false}
+        handleComponent={() => <View></View>}
+        index={0}
+        backdropComponent={(props) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} />}
+      >
+        <View
+          style={{
+            flex: 1,
+            // backgroundColor: "lightgrey",
+            alignItems: "center",
+            gap: 10,
+            padding: 15,
+          }}
+        >
+          {isDraft && (
+            <Button
+              textStyle={{ fontSize: 16 }}
+              title="Publish Draft"
+              variant="secondary"
+              style={{ flex: 1, width: "100%", borderRadius: 15 }}
+              LeftIcon={<Ionicons name="share-outline" size={20} />}
+            />
+          )}
+          {isDraft && (
+            <Button
+              textStyle={{ fontSize: 16 }}
+              title="Edit Draft"
+              variant="secondary"
+              style={{ flex: 1, width: "100%", borderRadius: 15 }}
+              LeftIcon={<Ionicons name="create-outline" size={20} />}
+            />
+          )}
+          <Button
+            textStyle={{ fontSize: 16 }}
+            title={isDraft ? "Delete Draft" : "Delete Post"}
+            onPress={async () => {
+              const reportDeleted = await deleteReport(post.id);
+              if (reportDeleted) router.push("/profile");
+            }}
+            variant="secondary"
+            style={{ flex: 1, width: "100%", borderRadius: 15 }}
+            LeftIcon={<Ionicons name="trash-outline" size={20} />}
+          />
+        </View>
+      </BottomSheetModal>
     </View>
   );
 }
@@ -66,12 +141,17 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   icon: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
+    flex: 1,
+    backgroundColor: "white",
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 15,
+    padding: 15,
+    flexDirection: "row",
+    gap: 5,
+  },
+  text: {
+    fontSize: 16,
   },
 });

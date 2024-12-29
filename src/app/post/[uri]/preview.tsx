@@ -41,7 +41,7 @@ export default function uri() {
 
   const handleNext = () => {
     const route = `post/${encodeURIComponent(uri as string)}/upload`;
-    router.push(route);
+    router.navigate(route);
   };
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function uri() {
           <View style={{ flex: 1 }}>
             <Image
               source={{ uri: uri }}
-              style={{ height: "100%", width: "100%", flex: 1, resizeMode: "cover" }}
+              style={{ height: "100%", width: "100%", flex: 1, resizeMode: "contain" }}
             />
           </View>
         )}

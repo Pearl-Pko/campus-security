@@ -8,10 +8,15 @@ import { logoutUser, useUserProfile } from "@/service/auth";
 import PageWrapper from "@/component/basic/PageWrapper";
 import Header from "@/component/basic/Header";
 import ProfilePic from "@/component/basic/Profile";
-import { SceneMap, TabBar, TabView } from "react-native-tab-view";
+import { SceneMap, SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import Post from "@/component/(app)/profile/Post";
 import Draft from "@/component/(app)/profile/Draft";
 import Media from "@/component/(app)/profile/Media";
+
+type TabRoutes = {
+  key: string;
+  title: string;
+};
 
 export default function Tab() {
   const router = useRouter();
@@ -21,18 +26,25 @@ export default function Tab() {
   const [index, setIndex] = useState(0);
   const navigation = useNavigation();
 
-  const [routes] = useState([
+  const [routes] = useState<TabRoutes[]>([
     { key: "first", title: "Draft" },
     { key: "second", title: "Post" },
     { key: "third", title: "Media" },
   ]);
 
-  const renderScene = SceneMap({
-    first: Draft,
-    second: Post,
-    third: Media,
-  });
 
+  const renderScene = ({ route }: SceneRendererProps & { route: TabRoutes }) => {
+    switch (route.key) {
+      case "first":
+        return <Draft uid={user?.user?.uid!} />;
+      case "second":
+        return <Post uid={user?.user?.uid!} />;
+      case "third":
+        return <Media uid={user?.user?.uid!}/>
+      default:
+        return null;
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {

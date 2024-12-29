@@ -4,9 +4,8 @@ import { SessionContext, SessionContextType } from "@/context/SessionContext";
 import { useGetUserIncidents } from "@/service/incident";
 import Content from "../Content";
 
-export default function Media() {
-  const user = useContext(SessionContext) as SessionContextType;
-  const incidents = useGetUserIncidents(user?.user?.uid || "", false);
+export default function Media({uid} : {uid: string}) {
+  const incidents = useGetUserIncidents(uid, false);
   return (
     <View style={{ flex: 1 }}>
       <FlatList

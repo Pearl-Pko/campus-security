@@ -16,7 +16,6 @@ export default function editprofile() {
   const router = useRouter();
   const user = useContext(SessionContext) as SessionContextType;
   // const [userProfile, setUserProfile] = useState<UserProfileSchema | null>(null);
-
   const {data: userProfile} = useUserProfile(user?.user?.uid);
 
   return (
