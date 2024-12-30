@@ -43,11 +43,12 @@ export default function upload() {
 
   const handleSubmit = async (isDraft: boolean = false) => {
     const form = getValues();
-
+    
     let currentLocation: Location.LocationObject | null = null;
     let currentAddress: Location.LocationGeocodedAddress[] | null = null;
-
+    
     if (form.useCurrentLocation) {
+      console.log("here");
       currentLocation = await Location.getCurrentPositionAsync();
       currentAddress = await Location.reverseGeocodeAsync(currentLocation.coords);
     }
@@ -88,6 +89,7 @@ export default function upload() {
       const result = await editIncidentDraftReport(draftId, submitForm);
       console.log("after", result);
     } else {
+      console.log("tried");
       const result = await createIncidentReport(submitForm);
       console.log("after", result);
     }
@@ -207,6 +209,7 @@ export default function upload() {
             <Button
               style={{ flex: 1 }}
               title="Drafts"
+              disabled={!!!user?.user}
               variant="secondary"
               onPress={() => handleSubmit(true)}
               LeftIcon={<Ionicons name="folder-open-outline" size={20} />}

@@ -17,6 +17,7 @@ export const IncidentSchema = z.object({
   address: z.string().nullable(),
   publishedAt: z.date().nullable(),
   reporter: UserProfileSchema,
+  draft: z.boolean(),
   media: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),

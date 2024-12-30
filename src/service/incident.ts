@@ -20,74 +20,87 @@ import { getUserProfile } from "./auth";
 import { useEffect, useState } from "react";
 
 export const createIncidentReport = async (dto: CreateIncidentDTO) => {
-  const reference = storage().ref(
-    `/incidents/${dto.useAnonymousReporting && !dto.draft ? "anonymous" : dto.reporterId}/${Date.now()}`,
-  );
-  const task = reference.putFile(dto.contentUri);
+  try {
+    console.log("kl")
+    const reference = storage().ref(
+      `/incidents/${dto.useAnonymousReporting && !dto.draft ? "anonymous" : dto.reporterId}/${Date.now()}`,
+    );
+    const task = reference.putFile(dto.contentUri);
 
-  await task;
-  console.log("uploadd");
+    await task;
+    console.log("uploadd");
 
-  const downloadUrl = await reference.getDownloadURL();
-  const reporterId = dto.useAnonymousReporting && !dto.draft ? null : dto.reporterId;
+    const downloadUrl = await reference.getDownloadURL();
+    const reporterId = dto.useAnonymousReporting && !dto.draft ? null : dto.reporterId;
 
-  const userProfile = reporterId
-    ? await getUserProfile(reporterId)
-    : { displayName: "Anonymous", avatar: null, username: "Anonymous" };
+    const userProfile = reporterId
+      ? await getUserProfile(reporterId)
+      : { displayName: "Anonymous", avatar: null, username: "Anonymous" };
 
-  const draftInfo = {
-    useAnonymousReporting: dto.useAnonymousReporting || null,
-    useCurrentLocation: dto.useCurrentLocation || null,
-  };
-  const incident = await firestore()
-    .collection("users")
-    .doc(reporterId || "anonymous")
-    .collection("incidents")
-    .doc(dto.draft ? "draft" : "published")
-    .collection("post")
-    .add({
-      reporterId: reporterId,
-      description: dto.description || null,
-      status: "open",
-      location: dto.location ? new GeoPoint(dto.location.latitude, dto.location.longitude) : null,
-      address: dto.address || null,
-      media: downloadUrl,
-      reporter: userProfile,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      ...(dto.draft ? draftInfo : {}),
+    const draftInfo = {
+      useAnonymousReporting: dto.useAnonymousReporting || null,
+      useCurrentLocation: dto.useCurrentLocation || null,
+    };
+    const incident = await firestore()
+      .collection("users")
+      .doc(reporterId || "anonymous")
+      .collection("incidents")
+      .doc(dto.draft ? "draft" : "published")
+      .collection("post")
+      .add({
+        reporterId: reporterId,
+        description: dto.description || null,
+        status: "open",
+        draft: dto.draft,
+        location: dto.location ? new GeoPoint(dto.location.latitude, dto.location.longitude) : null,
+        address: dto.address || null,
+        media: downloadUrl,
+        reporter: userProfile,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        ...(dto.draft ? draftInfo : {}),
+      });
+    await incident.update({
+      id: incident.id,
     });
-  await incident.update({
-    id: incident.id,
-  });
-  console.log("never");
-  return incident;
+    console.log("never");
+    return incident;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
 export const editIncidentDraftReport = async (id: string, dto: CreateIncidentDTO) => {
-  const userProfile = await getUserProfile(dto.reporterId!);
-  const incident = await firestore()
-    .collection("users")
-    .doc(dto.reporterId!)
-    .collection("incidents")
-    .doc("draft")
-    .collection("post")
-    .doc(id)
-    .set(
-      {
-        reporterId: dto.reporterId,
-        description: dto.description || null,
-        status: "open",
-        location: dto.location ? new GeoPoint(dto.location.latitude, dto.location.longitude) : null,
-        address: dto.address || null,
-        reporter: userProfile,
-        updatedAt: serverTimestamp(),
-        useAnonymousReporting: dto.useAnonymousReporting || null,
-        useCurrentLocation: dto.useCurrentLocation || null,
-      },
-      { merge: true },
-    );
-  return incident;
+  try {
+    const userProfile = await getUserProfile(dto.reporterId!);
+    const incident = await firestore()
+      .collection("users")
+      .doc(dto.reporterId!)
+      .collection("incidents")
+      .doc("draft")
+      .collection("post")
+      .doc(id)
+      .set(
+        {
+          reporterId: dto.reporterId,
+          description: dto.description || null,
+          status: "open",
+          location: dto.location
+            ? new GeoPoint(dto.location.latitude, dto.location.longitude)
+            : null,
+          address: dto.address || null,
+          reporter: userProfile,
+          updatedAt: serverTimestamp(),
+          useAnonymousReporting: dto.useAnonymousReporting || null,
+          useCurrentLocation: dto.useCurrentLocation || null,
+        },
+        { merge: true },
+      );
+    return incident;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const createIncidentDraftReport = async (dto: CreateIncidentDraftDto) => {
@@ -164,6 +177,7 @@ export const useGetAllIncidents = (): IncidentSchema[] => {
   useEffect(() => {
     const unsubscribe = firestore()
       .collectionGroup("post")
+      .where("draft", "==", false)
       .onSnapshot((snapshot) => {
         setIncidents(
           snapshot.docs.map((doc) => {
