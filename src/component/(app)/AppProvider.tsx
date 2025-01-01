@@ -8,12 +8,18 @@ import "react-native-get-random-values";
 import storage from "@react-native-firebase/storage";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { WEB_CLIENT_ID } from "@env";
 
 if (__DEV__) {
   auth().useEmulator("http://localhost:9099");
   firestore().useEmulator("localhost", 8080);
   storage().useEmulator("localhost", 9199);
 }
+
+GoogleSignin.configure({
+  webClientId: WEB_CLIENT_ID
+});
 
 export default function AppProvider({ children }: React.PropsWithChildren) {
   return (

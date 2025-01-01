@@ -1,0 +1,25 @@
+{
+    "cli": {
+      "version": ">= 2.4.1"
+    },
+    "build": {
+      "development": {
+        "developmentClient": true,
+        "distribution": "internal", 
+        "environment": "development",
+        "env": {
+          "APP_ENVIRONMENT": "development",
+          "EXPO_NO_DOTENV": "1"
+        }
+      },
+      "preview": {
+        "distribution": "internal"
+      },
+      "production": {
+        "distribution": "store"
+      }
+    },
+    "submit": {
+      "production": {}
+    }
+  }

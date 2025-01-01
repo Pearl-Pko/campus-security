@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 
 export const createIncidentReport = async (dto: CreateIncidentDTO) => {
   try {
-    console.log("kl")
+    console.log("kl");
     const reference = storage().ref(
       `/incidents/${dto.useAnonymousReporting && !dto.draft ? "anonymous" : dto.reporterId}/${Date.now()}`,
     );
@@ -250,17 +250,17 @@ export const publishDraft = () => {};
 
 export const editDraft = () => {};
 
-export const deleteReport = async (id: string) => {
+export const deleteReport = async (uid: string, postId: string, draft: boolean) => {
   try {
-    const querySnapshot = await firestore()
-      .collectionGroup("post")
-      .where("id", "==", id)
-      .orderBy("createdAt", "asc")
-      .get();
+    const doc = firestore()
+      .collection("users")
+      .doc(uid)
+      .collection("incidents")
+      .doc(draft ? "draft" : "published")
+      .collection("post")
+      .doc(postId);
+    await doc.delete();
 
-    if (querySnapshot.empty) return;
-
-    await querySnapshot.docs[0].ref.delete();
     return true;
   } catch (error) {
     console.error(error);

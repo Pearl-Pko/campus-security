@@ -32,7 +32,6 @@ export default function Tab() {
     { key: "third", title: "Media" },
   ]);
 
-
   const renderScene = ({ route }: SceneRendererProps & { route: TabRoutes }) => {
     switch (route.key) {
       case "first":
@@ -40,7 +39,7 @@ export default function Tab() {
       case "second":
         return <Post uid={user?.user?.uid!} />;
       case "third":
-        return <Media uid={user?.user?.uid!}/>
+        return <Media uid={user?.user?.uid!} />;
       default:
         return null;
     }
@@ -65,15 +64,7 @@ export default function Tab() {
             <Button
               title="Login"
               onPress={() => {
-                router.push("/signin");
-              }}
-              style={{ width: "80%", paddingVertical: 5, marginTop: 15 }}
-            />
-            <Button
-              title="Signup"
-              variant="primary"
-              onPress={() => {
-                router.push("/signup");
+                router.push("/signin-options");
               }}
               style={{ width: "80%", paddingVertical: 5, marginTop: 15 }}
             />

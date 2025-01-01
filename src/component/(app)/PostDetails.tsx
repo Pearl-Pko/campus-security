@@ -26,8 +26,7 @@ import { SessionContext, SessionContextType } from "@/context/SessionContext";
 export default function PostDetails({ post }: { post: IncidentSchema }) {
   const router = useRouter();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const isDraft = post.publishedAt === null || true;
-  const snapPoints = useMemo(() => [isDraft ? 220 : 100], []);
+  const snapPoints = useMemo(() => [post.draft ? 220 : 100], []);
 
   const user = useContext(SessionContext) as SessionContextType;
 
@@ -57,7 +56,7 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
             </View>
           </View>
         </View>
-        {post.reporterId && user?.user?.uid === post.reporterId && (
+        {post.reporterId && user?.user?.uid === post.reporterId  && (
           <TouchableOpacity onPress={() => bottomSheetRef.current?.present()}>
             <Ionicons name="ellipsis-vertical-outline" size={20} />
           </TouchableOpacity>
@@ -97,7 +96,7 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
             padding: 15,
           }}
         >
-          {isDraft && (
+          {post.draft && (
             <Button
               textStyle={{ fontSize: 16 }}
               title="Publish Draft"
@@ -106,7 +105,7 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
               LeftIcon={<Ionicons name="share-outline" size={20} />}
             />
           )}
-          {isDraft && (
+          {post.draft && (
             <Button
               textStyle={{ fontSize: 16 }}
               title="Edit Draft"
@@ -125,9 +124,10 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
           )}
           <Button
             textStyle={{ fontSize: 16 }}
-            title={isDraft ? "Delete Draft" : "Delete Post"}
+            title={post.draft ? "Delete Draft" : "Delete Post"}
             onPress={async () => {
-              const reportDeleted = await deleteReport(post.id);
+              if (!user?.user?.uid) return;
+              const reportDeleted = await deleteReport(user.user.uid, post.id, post.draft);
               if (reportDeleted) router.push("/profile");
             }}
             variant="secondary"
