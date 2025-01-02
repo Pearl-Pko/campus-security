@@ -17,6 +17,7 @@ export const IncidentSchema = z.object({
   address: z.string().nullable(),
   publishedAt: z.date().nullable(),
   reporter: UserProfileSchema,
+  isAnonymousProfile: z.boolean(),
   draft: z.boolean(),
   media: z.string(),
   createdAt: z.date(),
@@ -39,8 +40,10 @@ export const IncidentDraftSchema = z.object({
   address: z.string().nullable(),
   reporter: UserProfileSchema,
   media: z.string(),
-  createdAt: FireStoreTimeStamp,
-  updatedAt: FireStoreTimeStamp,
+  draft: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  isAnonymousProfile: z.boolean(),
   useCurrentLocation: z.boolean(),
   useAnonymousReporting: z.boolean(),
 });
@@ -76,6 +79,13 @@ export const SoS = z.object({
   userId: z.string().nullable(),
   id: z.string(),
   lastUpdated: z.date(),
+  isAnonymousProfile: z.boolean(),
 });
 
 export type Sos = z.infer<typeof SoS>;
+
+export const CreateSoSSchema = SoS.omit({
+  isAnonymousProfile: true,
+});
+
+export type CreateSoSSchema = z.infer<typeof CreateSoSSchema>;

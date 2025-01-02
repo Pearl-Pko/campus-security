@@ -57,7 +57,7 @@ export default function Tab() {
   return (
     <PageWrapper style={{ paddingHorizontal: 0 }}>
       <View style={styles.content}>
-        {!user?.user ? (
+        {(!user?.user || user.user.isAnonymous) ? (
           <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <Ionicons size={90} color="grey" name="person-outline" />
             <Text>Log into an existing account</Text>

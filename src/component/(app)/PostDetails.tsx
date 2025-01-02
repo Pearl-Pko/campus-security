@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { IncidentSchema } from "@/schema/incident";
+import { IncidentDraftSchema, IncidentSchema } from "@/schema/incident";
 import ProfilePic from "../basic/Profile";
 import pallets from "@/constants/pallets";
 import { format } from "date-fns";
@@ -23,7 +23,7 @@ import Button from "../Button";
 import { deleteReport } from "@/service/incident";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
 
-export default function PostDetails({ post }: { post: IncidentSchema }) {
+export default function PostDetails({ post }: { post: IncidentSchema | IncidentDraftSchema }) {
   const router = useRouter();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => [post.draft ? 220 : 100], []);
@@ -41,12 +41,18 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
       };
     }, []),
   );
+  console.log("herefd", post);
 
   return (
     <View style={{ backgroundColor: "white", padding: 15, flex: 1 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <View style={{ flexDirection: "row", gap: 10 }}>
-          <TouchableOpacity onPress={() => router.dismissTo(`/profile/${post.reporterId}`)}>
+          <TouchableOpacity
+            onPress={() => {
+              if (!post.reporterId || post.isAnonymousProfile) return;
+              router.navigate(`/profile/${post.reporterId}`);
+            }}
+          >
             <ProfilePic uri={post.reporter?.avatar} style={{ width: 40, height: 40 }} />
           </TouchableOpacity>
           <View style={{ gap: 0 }}>
@@ -56,7 +62,7 @@ export default function PostDetails({ post }: { post: IncidentSchema }) {
             </View>
           </View>
         </View>
-        {post.reporterId && user?.user?.uid === post.reporterId  && (
+        {post.reporterId && !post.isAnonymousProfile && user?.user?.uid === post.reporterId && (
           <TouchableOpacity onPress={() => bottomSheetRef.current?.present()}>
             <Ionicons name="ellipsis-vertical-outline" size={20} />
           </TouchableOpacity>

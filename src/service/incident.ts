@@ -1,6 +1,7 @@
 import {
   CreateIncidentDraftDto,
   CreateIncidentDTO,
+  CreateSoSSchema,
   FireStoreTimeStamp,
   IncidentDraftSchema,
   IncidentSchema,
@@ -18,8 +19,13 @@ import firestore, {
 import storage from "@react-native-firebase/storage";
 import { getUserProfile } from "./auth";
 import { useEffect, useState } from "react";
+import uuid from "react-native-uuid";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
-export const createIncidentReport = async (dto: CreateIncidentDTO) => {
+export const createIncidentReport = async (
+  user: FirebaseAuthTypes.User | null,
+  dto: CreateIncidentDTO,
+) => {
   try {
     console.log("kl");
     const reference = storage().ref(
@@ -33,25 +39,34 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
     const downloadUrl = await reference.getDownloadURL();
     const reporterId = dto.useAnonymousReporting && !dto.draft ? null : dto.reporterId;
 
-    const userProfile = reporterId
-      ? await getUserProfile(reporterId)
-      : { displayName: "Anonymous", avatar: null, username: "Anonymous" };
+    const userProfile =
+      reporterId && !user?.isAnonymous
+        ? await getUserProfile(reporterId)
+        : { displayName: "Anonymous", avatar: null, username: "Anonymous" };
 
     const draftInfo = {
       useAnonymousReporting: dto.useAnonymousReporting || null,
       useCurrentLocation: dto.useCurrentLocation || null,
     };
+
+    const id = uuid.v4();
+
+    console.log("is anon", user?.isAnonymous);
+
     const incident = await firestore()
       .collection("users")
       .doc(reporterId || "anonymous")
       .collection("incidents")
       .doc(dto.draft ? "draft" : "published")
       .collection("post")
-      .add({
+      .doc(id)
+      .set({
+        id: id,
         reporterId: reporterId,
         description: dto.description || null,
         status: "open",
         draft: dto.draft,
+        isAnonymousProfile: user?.isAnonymous ? true : false,
         location: dto.location ? new GeoPoint(dto.location.latitude, dto.location.longitude) : null,
         address: dto.address || null,
         media: downloadUrl,
@@ -60,9 +75,7 @@ export const createIncidentReport = async (dto: CreateIncidentDTO) => {
         updatedAt: serverTimestamp(),
         ...(dto.draft ? draftInfo : {}),
       });
-    await incident.update({
-      id: incident.id,
-    });
+
     console.log("never");
     return incident;
   } catch (error) {
@@ -178,6 +191,7 @@ export const useGetAllIncidents = (): IncidentSchema[] => {
     const unsubscribe = firestore()
       .collectionGroup("post")
       .where("draft", "==", false)
+      .orderBy("createdAt", "desc")
       .onSnapshot((snapshot) => {
         setIncidents(
           snapshot.docs.map((doc) => {
@@ -200,29 +214,89 @@ export const useGetAllIncidents = (): IncidentSchema[] => {
   return incidents;
 };
 
-export function useGetIncident<T>(id?: string) {
+export const useGetIncidentDraft = (uid: string | undefined, postId: string | undefined, enabled: boolean = true) => {
+  try {
+    if (!uid || !postId) return null;
+    
+    const [incident, setIncident] = useState<IncidentDraftSchema | null>(null);
+
+    useEffect(() => {
+      if (!enabled) return;
+
+      const unsuscribe = firestore()
+        .collection("users")
+        .doc(uid)
+        .collection("incidents")
+        .doc("draft")
+        .collection("post")
+        .doc(postId)
+        .onSnapshot((snapshot) => {
+          try {
+            if (!snapshot.exists) {
+              setIncident(null);
+              return;
+            }
+
+            const { createdAt, updatedAt, ...data } = snapshot.data() as any;
+
+            setIncident({
+              ...data,
+              createdAt: createdAt ? new Date(createdAt.seconds * 1000) : Date.now(),
+              updatedAt: updatedAt ? new Date(updatedAt.seconds * 1000) : Date.now(),
+            } as IncidentDraftSchema);
+          } catch (error) {
+            console.error(error);
+            setIncident(null);
+          }
+        });
+
+      return () => {
+        unsuscribe();
+      };
+    }, [uid, postId, enabled]);
+
+    return incident;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+export function useGetIncident(id?: string) {
   if (!id) return null;
 
-  const [incident, setIncident] = useState<T | null>(null);
+  const [incident, setIncident] = useState<IncidentSchema | null>(null);
   useEffect(() => {
     const unsubscribe = firestore()
       .collectionGroup("post")
+      .where("draft", "==", false)
       .where("id", "==", id)
+      .orderBy("createdAt", "desc")
       .onSnapshot((snapshot) => {
-        if (!snapshot?.docs || snapshot?.docs?.length === 0) return;
+        try {
+          if (snapshot.docs.length === 0) {
+            setIncident(null);
+            return;
+          }
 
-        const { createdAt, updatedAt, ...data } = snapshot.docs?.[0].data();
+          console.log("snaphsot", snapshot.docs);
 
-        console.log("see na", {
-          ...data,
-          createdAt: createdAt ? new Date(createdAt.seconds * 1000) : Date.now(),
-          updatedAt: updatedAt ? new Date(updatedAt.seconds * 1000) : Date.now(),
-        });
-        setIncident({
-          ...data,
-          createdAt: createdAt ? new Date(createdAt.seconds * 1000) : Date.now(),
-          updatedAt: updatedAt ? new Date(updatedAt.seconds * 1000) : Date.now(),
-        } as T);
+          const { createdAt, updatedAt, ...data } = snapshot.docs?.[0].data();
+
+          console.log("see na", {
+            ...data,
+            createdAt: createdAt ? new Date(createdAt.seconds * 1000) : Date.now(),
+            updatedAt: updatedAt ? new Date(updatedAt.seconds * 1000) : Date.now(),
+          });
+          setIncident({
+            ...data,
+            createdAt: createdAt ? new Date(createdAt.seconds * 1000) : Date.now(),
+            updatedAt: updatedAt ? new Date(updatedAt.seconds * 1000) : Date.now(),
+          } as IncidentSchema);
+        } catch (error) {
+          console.error(error);
+          setIncident(null);
+        }
       });
 
     return () => {
@@ -233,17 +307,24 @@ export function useGetIncident<T>(id?: string) {
   return incident;
 }
 
-export const sendSoS = async ({ longitude, latitude, userId, id, lastUpdated }: Sos) => {
-  return await firestore()
-    .collection("sos")
-    .doc(id)
-    .set({
-      longitude: longitude,
-      latitude: latitude,
-      userId: userId,
-      id: id,
-      lastUpdated: Timestamp.fromDate(lastUpdated),
-    });
+export const sendSoS = async (user: FirebaseAuthTypes.User | null, sos: CreateSoSSchema) => {
+  try {
+    return await firestore()
+      .collection("users")
+      .doc(user?.uid || "anonymous")
+      .collection("sos")
+      .doc(sos.id)
+      .set({
+        longitude: sos.longitude,
+        latitude: sos.latitude,
+        userId: sos.userId,
+        id: sos.id,
+        isAnonymousProfile: user?.isAnonymous ? true : false,
+        lastUpdated: Timestamp.fromDate(sos.lastUpdated),
+      });
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const publishDraft = () => {};

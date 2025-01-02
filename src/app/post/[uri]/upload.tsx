@@ -8,7 +8,7 @@ import { CreateIncidentDraftDto, CreateIncidentDTO, IncidentDraftSchema } from "
 import Header from "@/component/basic/Header";
 import { Checkbox } from "react-native-paper";
 import pallets from "@/constants/pallets";
-import { createIncidentReport, editIncidentDraftReport, useGetIncident } from "@/service/incident";
+import { createIncidentReport, editIncidentDraftReport, useGetIncident, useGetIncidentDraft } from "@/service/incident";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { UploadContext, UploadContextType } from "./_layout";
@@ -23,7 +23,7 @@ export default function upload() {
 
   const user = useContext(SessionContext) as SessionContextType;
 
-  const draft = useGetIncident<IncidentDraftSchema>(draftId);
+  const draft = useGetIncidentDraft(user?.user?.uid, draftId, true);
 
   const {
     control,
@@ -42,6 +42,8 @@ export default function upload() {
   }, [draft]);
 
   const handleSubmit = async (isDraft: boolean = false) => {
+    if (!user) return;
+
     const form = getValues();
     
     let currentLocation: Location.LocationObject | null = null;
@@ -90,7 +92,7 @@ export default function upload() {
       console.log("after", result);
     } else {
       console.log("tried");
-      const result = await createIncidentReport(submitForm);
+      const result = await createIncidentReport(user.user, submitForm);
       console.log("after", result);
     }
     router.push("/profile");
@@ -204,12 +206,12 @@ export default function upload() {
             </Text>
           </View>
         </View>
-        {!draftId && (
+        {(!draftId ) && (
           <View style={{ flexDirection: "row", gap: 10 }}>
             <Button
               style={{ flex: 1 }}
               title="Drafts"
-              disabled={!!!user?.user}
+              disabled={!!(!user?.user || user.user.isAnonymous)}
               variant="secondary"
               onPress={() => handleSubmit(true)}
               LeftIcon={<Ionicons name="folder-open-outline" size={20} />}

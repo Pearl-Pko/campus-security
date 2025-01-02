@@ -19,7 +19,9 @@ export default function sos() {
       return await Location.watchPositionAsync(
         { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 2},
         (location) => {
-          sendSoS({
+          if (!user) return;
+
+          sendSoS(user.user, {
             longitude: location.coords.longitude,
             latitude: location.coords.latitude,
             lastUpdated: new Date(location.timestamp),

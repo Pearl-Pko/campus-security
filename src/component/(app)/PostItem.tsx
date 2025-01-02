@@ -12,8 +12,6 @@ import { IncidentSchema } from "@/schema/incident";
 import ProfilePic from "../basic/Profile";
 import pallets from "@/constants/pallets";
 import { format } from "date-fns";
-import { VideoView } from "expo-video";
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
 import Content from "./Content";
@@ -27,13 +25,15 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
       underlayColor="#EEEEEE"
       style={{ backgroundColor: "white", padding: 15 }}
       onPress={() => {
-        router.navigate(`/report/${post.id}`);
+        router.navigate({
+          pathname: `/report/${post.draft ? "draft" : "published"}/${post.id}`,
+        });
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
         <TouchableOpacity
           onPress={() => {
-            if (!post.reporterId) return;
+            if (!post.reporterId || post.isAnonymousProfile) return;
             if (user?.currentPageUserId !== post.reporterId)
               router.navigate(`/profile/${post.reporterId}`);
           }}
@@ -52,10 +52,12 @@ export default function PostItem({ post }: { post: IncidentSchema }) {
             </Text>
           </View>
           <View style={{ gap: 5 }}>
-            <View>
-              <Text numberOfLines={5}>{post.description}</Text>
-            </View>
-            <View style={{height: 200}}>
+            {post.description && (
+              <View>
+                <Text numberOfLines={5}>{post.description}</Text>
+              </View>
+            )}
+            <View style={{ height: 200 }}>
               <Content uri={post.media} />
             </View>
           </View>

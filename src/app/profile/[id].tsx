@@ -37,7 +37,7 @@ export default function User() {
       case "first":
         return <Post uid={id} />;
       case "second":
-        return <Draft uid={id} />;
+        return <Media uid={id} />;
       default:
         return null;
     }

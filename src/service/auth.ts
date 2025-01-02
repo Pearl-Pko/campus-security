@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 const db = firestore();
 
-console.log(db.app.options.projectId);
+// console.log(db.app.options.projectId);
 export const signupUser = async (email: string, password: string) => {
   try {
     const user = await auth().createUserWithEmailAndPassword(email, password);
@@ -27,6 +27,7 @@ const completeSignup = async (user: FirebaseAuthTypes.User) => {
 
   await updateProfile(user, {
     displayName: displayName,
+
   });
 
   const userRef = doc(db, "users", user.uid);
