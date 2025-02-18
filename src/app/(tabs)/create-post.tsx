@@ -7,10 +7,20 @@ import {
   Pressable,
   TouchableOpacity,
   Image,
+  Linking,
+  Alert,
+  AppState,
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Svg, { Circle } from "react-native-svg";
-import { Camera, CameraType, CameraView, FlashMode, useCameraPermissions } from "expo-camera";
+import {
+  Camera,
+  CameraType,
+  CameraView,
+  FlashMode,
+  useCameraPermissions,
+  useMicrophonePermissions,
+} from "expo-camera";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import Animated, {
   cancelAnimation,
@@ -20,6 +30,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { withPause } from "react-native-redash";
 import { useFocusEffect, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -37,10 +48,12 @@ export default function video() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
   const [key, setKey] = useState(0);
+  const [appState, setAppState] = useState(AppState.currentState);
 
   const [mode, setMode] = useState<"video" | "picture" | null>(null);
   // const [pictureUri, setPictureUri] = useState("");
-  const [permission, requestPermission] = useCameraPermissions();
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [microphonePermission, requestMicrophonePermission] = useMicrophonePermissions();
   const paused = useSharedValue<boolean>(true);
   const cameraRef = useRef<CameraView>(null);
   const [recording, setRecording] = useState<boolean>(false);
@@ -106,8 +119,7 @@ export default function video() {
     } else if (mode == "picture") {
       const picture = await cameraRef.current?.takePictureAsync({});
 
-      if (!picture?.uri) 
-        return;
+      if (!picture?.uri) return;
 
       const route = `post/${encodeURIComponent(picture?.uri)}/preview`;
       router.navigate({ pathname: route, params: { mode } });
@@ -136,17 +148,12 @@ export default function video() {
     if (!result.canceled) {
       const route = `post/${encodeURIComponent(result.assets[0].uri)}/preview`;
       console.log("there", route);
-      router.navigate({ pathname: route, params: { mode: getMediaType(result.assets[0].mimeType!) } });
+      router.navigate({
+        pathname: route,
+        params: { mode: getMediaType(result.assets[0].mimeType!) },
+      });
     }
   };
-
-  useEffect(() => {
-    (async () => {
-      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
-      const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
-      // setHasPermission(cameraStatus === "granted" && audioStatus === "granted");
-    })();
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -170,31 +177,55 @@ export default function video() {
     }, []),
   );
 
-  // console.log("stroke main", strokeOffset.get());
+  useEffect(() => {
+    requestCameraPermission();
+    requestMicrophonePermission();
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (appState.match(/inactive|background/) && nextAppState === "active") {
+        requestCameraPermission();
+        requestMicrophonePermission();
+      }
+      setAppState(nextAppState);
+    });
 
-  if (!permission) {
+    return () => subscription.remove();
+  }, [appState]);
+
+  if (!cameraPermission) {
     return <View />;
   }
 
-  if (!permission.granted) {
-    return (
-      <View>
-        <Text>We need your permission to show the camera</Text>
-        <Button onPress={requestPermission} title="grant permission" />
-      </View>
-    );
-  }
+  // if (!permission.granted) {
+  //   return (
+  //     <View>
+  //       <Text>Allow Campus Secuirty to access your camera</Text>
+  //       <Button onPress={requestPermission} title="grant permission" />
+  //     </View>
+  //   );
+  // }
+
+  const permissionGranted = cameraPermission.granted && microphonePermission?.granted;
 
   return (
     <View style={styles.container}>
       <View style={{ flex: 1, marginVertical: 40 }}>
-        <CameraView
-          style={styles.camera}
-          facing={facing}
-          ref={cameraRef}
-          mode="video"
-          flash={flash}
-        ></CameraView>
+        {permissionGranted ? (
+          <CameraView
+            style={styles.camera}
+            facing={facing}
+            ref={cameraRef}
+            mode="video"
+            flash={flash}
+          ></CameraView>
+        ) : (
+          <>
+            <LinearGradient
+              colors={["#08A4BD", "rgba(242, 223, 215, 0.6)"]}
+              style={styles.camera}
+            />
+            {/* <Text style={{backgroundColor: "white"}}>kdls</Text> */}
+          </>
+        )}
         <View style={styles.overlay}>
           <View
             style={{
@@ -235,12 +266,41 @@ export default function video() {
               <TouchableOpacity onPress={() => router.back()}>
                 <Ionicons name="close" size={40} color="white" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => toggleFlash()}>
+              <TouchableOpacity
+                onPress={() => toggleFlash()}
+                disabled={!permissionGranted}
+                style={!permissionGranted && { opacity: 0.4 }}
+              >
                 <Ionicons
                   name={flash === "on" ? "flash-outline" : "flash-off-outline"}
                   size={30}
                   color="white"
                 />
+              </TouchableOpacity>
+            </View>
+          )}
+          {!permissionGranted && (
+            <View style={{ justifyContent: "center", alignItems: "center", padding: 20, gap: 15 }}>
+              <Text
+                style={{ color: "white", fontSize: 20, textAlign: "center", fontWeight: "bold" }}
+              >
+                Allow Campus security to access your camera and microphone
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  Linking.openSettings().catch(() => {
+                    Alert.alert("Failed to open settings");
+                  });
+                }}
+                style={{
+                  backgroundColor: "rgba(0, 0, 0, 0.15)",
+                  width: "100%",
+                  alignItems: "center",
+                  padding: 20,
+                  borderRadius: 15,
+                }}
+              >
+                <Text style={{ color: "white", fontSize: 20 }}>Open Settings</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -270,7 +330,8 @@ export default function video() {
               onPressOut={() => {
                 endCapture();
               }}
-              style={styles.svg}
+              disabled={!permissionGranted}
+              style={[styles.svg, !permissionGranted && { opacity: 0.4 }]}
             >
               <Svg viewBox="0 0 100 100" width={100} height={100}>
                 <AnimatedCircle
@@ -291,7 +352,11 @@ export default function video() {
 
             {!recording && (
               <View>
-                <TouchableOpacity onPress={() => toggleCameraFacing()}>
+                <TouchableOpacity
+                  disabled={!permissionGranted}
+                  style={!permissionGranted && { opacity: 0.4 }}
+                  onPress={() => toggleCameraFacing()}
+                >
                   <Ionicons name="sync-outline" size={35} color="white" />
                 </TouchableOpacity>
               </View>

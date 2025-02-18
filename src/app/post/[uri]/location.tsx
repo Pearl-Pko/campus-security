@@ -30,7 +30,7 @@ export default function location() {
         enablePoweredByContainer={false}
         fetchDetails={true}
         keepResultsAfterBlur={true}
-      
+        
         onPress={(data, details) => {
           setLocation(details);
           router.back();

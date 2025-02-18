@@ -51,6 +51,7 @@ export const googleSignIn = async () => {
       const googleCredential = auth.GoogleAuthProvider.credential(response.data.idToken);
       const user = await auth().signInWithCredential(googleCredential);
       console.log("user", user);
+      
       if (user.additionalUserInfo?.isNewUser) {
         await completeSignup(user.user);
       }
