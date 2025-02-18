@@ -13,6 +13,7 @@ import Error from "@/component/basic/Error";
 import { isEqual } from "lodash";
 import { updateUserProfile } from "@/service/auth";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
+import FullScreenLoader from "@/component/basic/FullScreenLoader";
 
 const EditBioName = UserProfileSchema.pick({
   bio: true,
@@ -24,7 +25,7 @@ export default function name() {
   const router = useRouter();
   const params = useLocalSearchParams() as EditBioName;
   const user = useContext(SessionContext) as SessionContextType;
-  const { control, formState, getValues } = useForm<EditBioName>({
+  const { control, formState, getValues, handleSubmit } = useForm<EditBioName>({
     resolver: zodResolver(EditBioName),
     mode: "onChange",
     defaultValues: {
@@ -49,7 +50,7 @@ export default function name() {
         LeftIcon={<Text>Cancel</Text>}
         title="Name"
         RightIcon={
-          <TouchableOpacity disabled={!canSubmit} onPress={() => submit()}>
+          <TouchableOpacity disabled={!canSubmit} onPress={handleSubmit(() => submit())}>
             <Text style={[{ color: pallets.colors.primary }, !canSubmit && { opacity: 0.4 }]}>
               Save
             </Text>
@@ -80,6 +81,7 @@ export default function name() {
           <Error title={formState.errors.bio?.message} />
         </View>
       </View>
+      <FullScreenLoader visible={formState.isSubmitting} />
     </PageWrapper>
   );
 }

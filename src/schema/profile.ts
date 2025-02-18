@@ -5,7 +5,8 @@ export const UserProfileSchema = z.object({
     username: z.string(), 
     displayName: z.string(),
     bio: z.string().max(80).nullable(), 
-    avatar: z.string()
+    avatar: z.string(),
+    phoneNumber: z.string()
 
 })
 

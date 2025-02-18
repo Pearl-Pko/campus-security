@@ -38,6 +38,7 @@ const completeSignup = async (user: FirebaseAuthTypes.User) => {
     displayName: displayName,
     bio: null,
     avatar: null,
+    phoneNumber: null
   });
 };
 

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity} from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import PageWrapper from "@/component/basic/PageWrapper";
 import Header from "@/component/basic/Header";
@@ -16,7 +16,7 @@ export default function editprofile() {
   const router = useRouter();
   const user = useContext(SessionContext) as SessionContextType;
   // const [userProfile, setUserProfile] = useState<UserProfileSchema | null>(null);
-  const {data: userProfile} = useUserProfile(user?.user?.uid);
+  const { data: userProfile } = useUserProfile(user?.user?.uid);
 
   return (
     <PageWrapper>
@@ -27,9 +27,14 @@ export default function editprofile() {
           <Text>Change photo</Text>
         </View>
         <Text style={{ color: "grey" }}>About you</Text>
-        <View style={{gap: 15, marginTop: 10}}>
+        <View style={{ gap: 15, marginTop: 10 }}>
           <TouchableOpacity
-            onPress={() => router.push({pathname: "/edit-profile/name", params: {displayName: userProfile?.displayName}})}
+            onPress={() =>
+              router.push({
+                pathname: "/edit-profile/name",
+                params: { displayName: userProfile?.displayName },
+              })
+            }
             style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
           >
             <Text>Name</Text>
@@ -39,8 +44,12 @@ export default function editprofile() {
             </View>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.push({pathname: "/edit-profile/username", params: {username: userProfile?.username}})}
-
+            onPress={() =>
+              router.push({
+                pathname: "/edit-profile/username",
+                params: { username: userProfile?.username },
+              })
+            }
             style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
           >
             <Text>Username</Text>
@@ -50,13 +59,26 @@ export default function editprofile() {
             </View>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.push({pathname: "/edit-profile/bio", params: {bio: userProfile?.bio}})}
-
+            onPress={() =>
+              router.push({ pathname: "/edit-profile/bio", params: { bio: userProfile?.bio } })
+            }
             style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
           >
             <Text>Bio</Text>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Text>{userProfile?.bio}</Text>
+              <Ionicons name="chevron-forward-outline" size={20} color={"grey"} />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({ pathname: "/edit-profile/phone", params: { phoneNumber: userProfile?.phoneNumber } })
+            }
+            style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
+          >
+            <Text>Phone number</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text>{userProfile?.phoneNumber}</Text>
               <Ionicons name="chevron-forward-outline" size={20} color={"grey"} />
             </View>
           </TouchableOpacity>

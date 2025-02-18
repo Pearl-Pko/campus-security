@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import React from "react";
 import Header from "@/component/basic/Header";
 import PageWrapper from "@/component/basic/PageWrapper";
@@ -10,9 +10,10 @@ import { LoginUserWithEmailSchema } from "@/schema/auth";
 import Error from "@/component/basic/Error";
 import { signInUser, signupUser } from "@/service/auth";
 import { useRouter } from "expo-router";
+import FullScreenLoader from "@/component/basic/FullScreenLoader";
 
 export default function signin() {
-  const { control, formState, setValue, watch, getValues } = useForm<LoginUserWithEmailSchema>({
+  const { control, formState, setValue, watch, getValues, handleSubmit } = useForm<LoginUserWithEmailSchema>({
     resolver: zodResolver(LoginUserWithEmailSchema),
     mode: "onChange",
   });
@@ -23,6 +24,7 @@ export default function signin() {
     const { email, password } = getValues();
     const result = await signupUser(email, password);
     if (typeof result === "string") {
+      Alert.alert("Failed to sign in");
     } else {
       console.log("ds", result);
       router.push("/profile");
@@ -79,8 +81,9 @@ export default function signin() {
             <Error title={formState.errors.password?.message} />
           </View>
         </View>
-        <Button disabled={!formState.isValid} title="Continue" onPress={() => handleSignUp()} />
+        <Button  disabled={!formState.isValid} title="Continue" onPress={handleSubmit(() => handleSignUp())} />
       </View>
+      <FullScreenLoader visible={formState.isSubmitting}/>
     </PageWrapper>
   );
 }

@@ -15,25 +15,23 @@ import { updateUserProfile } from "@/service/auth";
 import { SessionContext, SessionContextType } from "@/context/SessionContext";
 import FullScreenLoader from "@/component/basic/FullScreenLoader";
 
-const EditUserName = UserProfileSchema.pick({
-  username: true,
+const EditPhoneNumber = UserProfileSchema.pick({
+  phoneNumber: true,
 });
 
-type EditUserName = z.infer<typeof EditUserName>;
+type EditUserName = z.infer<typeof EditPhoneNumber>;
 
 export default function name() {
   const router = useRouter();
   const params = useLocalSearchParams<EditUserName>();
   const user = useContext(SessionContext) as SessionContextType;
   const { control, formState, getValues, handleSubmit } = useForm<EditUserName>({
-    resolver: zodResolver(EditUserName),
+    resolver: zodResolver(EditPhoneNumber),
     mode: "onChange",
     defaultValues: {
-      username: params.username,
+      phoneNumber: params.phoneNumber,
     },
   });
-
-  console.log("ds", params.username);
 
   const canSubmit =
     formState.isValid && formState.isDirty && !isEqual(getValues(), formState.defaultValues);
@@ -50,7 +48,7 @@ export default function name() {
     <PageWrapper>
       <Header
         LeftIcon={<Text>Cancel</Text>}
-        title="Username"
+        title="Phone Number"
         RightIcon={
           <TouchableOpacity disabled={!canSubmit} onPress={handleSubmit(() => submit())}>
             <Text style={[{ color: pallets.colors.primary }, !canSubmit && { opacity: 0.4 }]}>
@@ -60,11 +58,11 @@ export default function name() {
         }
       />
       <View style={{ marginTop: 15 }}>
-        <Text style={{ color: "grey", fontWeight: "600" }}>Name</Text>
+        <Text style={{ color: "grey", fontWeight: "600" }}>Phone Number</Text>
         <View style={{ gap: 3 }}>
           <Controller
             control={control}
-            name="username"
+            name="phoneNumber"
             render={({ field: { value, onChange } }) => {
               return (
                 <TextInput
@@ -81,7 +79,7 @@ export default function name() {
               );
             }}
           />
-          <Error title={formState.errors.username?.message} />
+          <Error title={formState.errors.phoneNumber?.message} />
         </View>
       </View>
       <FullScreenLoader visible={formState.isSubmitting}/>
