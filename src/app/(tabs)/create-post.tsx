@@ -35,6 +35,7 @@ import { withPause } from "react-native-redash";
 import { useFocusEffect, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { getMediaType, waitUntil } from "@/util/util";
+import { useAppState } from "@/hooks/useAppState";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedText = Animated.createAnimatedComponent(TextInput);
@@ -48,7 +49,10 @@ export default function video() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
   const [key, setKey] = useState(0);
-  const [appState, setAppState] = useState(AppState.currentState);
+  // useAppState(() => {
+  //   requestCameraPermission();
+  //   requestMicrophonePermission();
+  // });
 
   const [mode, setMode] = useState<"video" | "picture" | null>(null);
   // const [pictureUri, setPictureUri] = useState("");
@@ -177,19 +181,11 @@ export default function video() {
     }, []),
   );
 
+
   useEffect(() => {
     requestCameraPermission();
     requestMicrophonePermission();
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (appState.match(/inactive|background/) && nextAppState === "active") {
-        requestCameraPermission();
-        requestMicrophonePermission();
-      }
-      setAppState(nextAppState);
-    });
-
-    return () => subscription.remove();
-  }, [appState]);
+  }, [])
 
   if (!cameraPermission) {
     return <View />;

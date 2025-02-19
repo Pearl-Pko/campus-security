@@ -120,9 +120,9 @@ export default function upload() {
         RightIcon={
           draftId ? (
             <TouchableOpacity
-              onPress={() => {
-                onSubmit(true);
-              }}
+              onPress={
+                handleSubmit(() => onSubmit(true))
+              }
             >
               <Text style={{ color: pallets.colors.primary }}>Save</Text>
             </TouchableOpacity>

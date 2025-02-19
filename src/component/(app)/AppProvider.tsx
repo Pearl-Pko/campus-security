@@ -11,14 +11,16 @@ import auth from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { WEB_CLIENT_ID } from "@env";
 
-if (__DEV__) {
-  auth().useEmulator("http://localhost:9099");
-  firestore().useEmulator("localhost", 8080);
-  storage().useEmulator("localhost", 9199);
-}
+// if (__DEV__) {
+//   auth().useEmulator("http://localhost:9099");
+//   firestore().useEmulator("localhost", 8080);
+//   storage().useEmulator("localhost", 9199);
+// }
+
+console.log("a", WEB_CLIENT_ID)
 
 GoogleSignin.configure({
-  webClientId: WEB_CLIENT_ID
+  webClientId: process.env.WEB_CLIENT_ID
 });
 
 export default function AppProvider({ children }: React.PropsWithChildren) {

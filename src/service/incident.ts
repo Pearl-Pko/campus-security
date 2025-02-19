@@ -194,7 +194,7 @@ export const useGetAllIncidents = (): IncidentSchema[] => {
       .orderBy("createdAt", "desc")
       .onSnapshot((snapshot) => {
         setIncidents(
-          snapshot.docs.map((doc) => {
+          snapshot?.docs?.map((doc) => {
             const { createdAt, updatedAt, ...data } = doc.data();
             return {
               ...data,
@@ -202,7 +202,7 @@ export const useGetAllIncidents = (): IncidentSchema[] => {
               createdAt: createdAt ? new Date(createdAt.seconds * 1000) : Date.now(),
               updatedAt: updatedAt ? new Date(updatedAt.seconds * 1000) : Date.now(),
             } as IncidentSchema;
-          }),
+          }) || [],
         );
       });
 
@@ -214,10 +214,14 @@ export const useGetAllIncidents = (): IncidentSchema[] => {
   return incidents;
 };
 
-export const useGetIncidentDraft = (uid: string | undefined, postId: string | undefined, enabled: boolean = true) => {
+export const useGetIncidentDraft = (
+  uid: string | undefined,
+  postId: string | undefined,
+  enabled: boolean = true,
+) => {
   try {
     if (!uid || !postId) return null;
-    
+
     const [incident, setIncident] = useState<IncidentDraftSchema | null>(null);
 
     useEffect(() => {

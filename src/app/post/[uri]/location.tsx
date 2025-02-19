@@ -13,6 +13,7 @@ export default function location() {
   const router = useRouter();
   const { setLocation } = useContext(UploadContext) as UploadContextType;
 
+  console.log("i", GOOGLE_MAP_API_KEY)
   return (
     <PageWrapper>
       <Header
@@ -22,7 +23,7 @@ export default function location() {
       />
       <GooglePlacesAutocomplete
         query={{
-          key: GOOGLE_MAP_API_KEY,
+          key: process.env.GOOGLE_MAP_API_KEY,
           type: "establishment",
         }}
         placeholder="Search Location"

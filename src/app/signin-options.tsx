@@ -6,9 +6,14 @@ import { googleSignIn, signInUser } from "@/service/auth";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import pallets from "@/constants/pallets";
+import { useForm } from "react-hook-form";
+import FullScreenLoader from "@/component/basic/FullScreenLoader";
 
 export default function AuthOptions() {
   const router = useRouter();
+
+  const {handleSubmit, formState} = useForm();
+
 
   const handleGoogleSignIn = async () => {
     const user = await googleSignIn();
@@ -82,6 +87,7 @@ export default function AuthOptions() {
           </TouchableOpacity>
         </View>
       </View>
+      {/* <FullScreenLoader visible={formState.isSubmitting}/> */}
     </PageWrapper>
   );
 }
